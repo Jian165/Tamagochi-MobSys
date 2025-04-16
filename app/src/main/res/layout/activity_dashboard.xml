@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/room"
+    tools:context=".Dashboard"
+    >
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/shadow"
+        android:layout_alignBottom="@id/imgCharacter"
+        android:layout_alignLeft="@id/imgCharacter"
+        android:layout_alignRight="@id/imgCharacter"
+        android:layout_marginBottom="70dp"
+        />
+    <ImageView
+        android:id="@+id/imgCharacter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="80dp"
+        android:src="@drawable/idle_1"
+        />
+
+    <ImageView
+        android:id="@+id/imgShit1"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/shit_happen"
+        android:layout_alignLeft="@+id/imgCharacter"
+        android:layout_alignBottom="@id/imgCharacter"
+        android:layout_marginLeft="20dp"
+        />
+
+    <ImageView
+        android:id="@+id/imgShit2"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/shit_happen"
+        android:layout_alignRight="@+id/imgShit3"
+        android:layout_alignLeft="@+id/imgShit1"
+        android:layout_alignBottom="@+id/imgCharacter"
+        android:layout_marginRight="20dp"
+        />
+
+    <ImageView
+        android:id="@+id/imgShit3"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/shit_happen"
+        android:layout_alignRight="@+id/imgCharacter"
+        android:layout_alignBottom="@+id/imgCharacter"
+        android:layout_marginRight="20dp"
+        />
+
+
+
+
+</RelativeLayout>
