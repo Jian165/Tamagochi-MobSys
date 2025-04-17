@@ -17,7 +17,14 @@ import java.util.ArrayList;
 
 public class Dashboard extends AppCompatActivity {
 
-    ImageView characterImg,shit1Img,shit2Img,shit3Img,shit4Img,shit5Img,cleanImg;
+    ImageView characterImg,
+            shit1Img,
+            shit2Img,
+            shit3Img,
+            shit4Img,
+            shit5Img,
+            feedImg,
+            cleanImg;
     private Runnable runnable;
     private ArrayList<Integer> charachterIdleImages;
     private int IdleImgIndex = 0;
@@ -36,12 +43,6 @@ public class Dashboard extends AppCompatActivity {
         LoadComponents();
         PlayIdle();
 
-        cleanImg.setOnLongClickListener(itemClickListiner());
-        shit1Img.setOnDragListener(shitDragListiner(shit1Img));
-        shit2Img.setOnDragListener(shitDragListiner(shit2Img));
-        shit3Img.setOnDragListener(shitDragListiner(shit3Img));
-        shit4Img.setOnDragListener(shitDragListiner(shit4Img));
-        shit5Img.setOnDragListener(shitDragListiner(shit5Img));
     }
 
     private View.OnLongClickListener itemClickListiner(){
@@ -69,7 +70,7 @@ public class Dashboard extends AppCompatActivity {
                        break;
                    case DragEvent.ACTION_DROP:
                        final View view = (View) event.getLocalState();
-                       if(view.getId() == R.id.clean) {
+                       if(view.getId() == R.id.imgClean) {
                            shitImage.setAlpha(0f);
                        }
                        break;
@@ -80,12 +81,21 @@ public class Dashboard extends AppCompatActivity {
     }
     private void LoadComponents(){
         characterImg = findViewById(R.id.imgCharacter);
-        cleanImg = findViewById(R.id.clean);
+        feedImg  = findViewById(R.id.imgFeed);
+        cleanImg = findViewById(R.id.imgClean);
         shit1Img = findViewById(R.id.imgShit1);
         shit2Img = findViewById(R.id.imgShit2);
         shit3Img = findViewById(R.id.imgShit3);
         shit4Img = findViewById(R.id.imgShit4);
         shit5Img = findViewById(R.id.imgShit5);
+
+        cleanImg.setOnLongClickListener(itemClickListiner());
+        feedImg.setOnLongClickListener(itemClickListiner());
+        shit1Img.setOnDragListener(shitDragListiner(shit1Img));
+        shit2Img.setOnDragListener(shitDragListiner(shit2Img));
+        shit3Img.setOnDragListener(shitDragListiner(shit3Img));
+        shit4Img.setOnDragListener(shitDragListiner(shit4Img));
+        shit5Img.setOnDragListener(shitDragListiner(shit5Img));
     }
 
     private void PlayIdle()
