@@ -8,34 +8,35 @@
     android:background="@color/blue_080"
     tools:context=".Dashboard"
     >
-        <ImageView
-            android:id="@+id/imgBackground"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerHorizontal="true"
-            android:layout_alignBottom="@id/imgCharacter"
-            android:layout_marginBottom="-120dp"
-            android:padding="0dp"
-            android:src="@drawable/room"
-            android:scaleType="centerCrop"
-            />
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/shadow"
-            android:layout_alignBottom="@id/imgCharacter"
-            android:layout_alignLeft="@id/imgCharacter"
-            android:layout_alignRight="@id/imgCharacter"
-            android:layout_marginBottom="30dp"
-            />
-        <ImageView
-            android:id="@+id/imgCharacter"
-            android:layout_width="400dp"
-            android:layout_height="400dp"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:src="@drawable/idle_1"
-            />
+    <ImageView
+        android:id="@+id/imgBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_alignBottom="@id/imgCharacter"
+        android:layout_marginBottom="-120dp"
+        android:padding="0dp"
+        android:src="@drawable/room"
+        android:scaleType="centerCrop"
+        />
+    <ImageView
+        android:id="@+id/imgShadow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/shadow"
+        android:layout_alignBottom="@id/imgCharacter"
+        android:layout_alignLeft="@id/imgCharacter"
+        android:layout_alignRight="@id/imgCharacter"
+        android:layout_marginBottom="30dp"
+        />
+    <ImageView
+        android:id="@+id/imgCharacter"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/idle_1"
+        />
     <ImageView
         android:id="@+id/healthImg"
         android:layout_width="40dp"
@@ -53,7 +54,6 @@
         android:layout_height="40dp"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:progressDrawable="@drawable/bg_health"
-        android:progress="50"
         android:layout_alignTop="@id/healthImg"
         android:layout_alignBottom="@id/healthImg"
         android:layout_alignRight="@id/imgCharacter"
@@ -71,72 +71,100 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="12dp"
         />
-
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Health"
+        android:gravity="center"
+        android:fontFamily="@font/chewy_regular"
+        android:textColor="@color/back_D0D"
+        android:textSize="16dp"
+        android:letterSpacing="0.15"
+        android:layout_alignTop="@id/healthProgress"
+        android:layout_alignBottom="@id/healthProgress"
+        android:layout_alignLeft="@id/healthProgress"
+        android:layout_alignRight="@id/healthProgress"
+        />
     <ProgressBar
         android:id="@+id/happinessProgress"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:progressDrawable="@drawable/bg_happiness"
-        android:progress="50"
         android:layout_alignTop="@id/happyImg"
         android:layout_alignBottom="@id/happyImg"
         android:layout_alignRight="@id/healthProgress"
         android:layout_toEndOf="@+id/happyImg"
         />
-        <ImageView
-            android:id="@+id/imgShit1"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/shit_happen"
-            android:layout_alignBottom="@id/imgCharacter"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="-40dp"
-            />
-        <ImageView
-            android:id="@+id/imgShit2"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/shit_happen"
-            android:layout_alignTop="@id/imgShit1"
-            android:layout_toStartOf="@id/imgShit1"
-            android:layout_marginRight="30dp"
-            android:layout_marginTop="-20dp"
-            />
-        <ImageView
-            android:id="@+id/imgShit3"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/shit_happen"
-            android:layout_alignTop="@id/imgShit1"
-            android:layout_toEndOf="@id/imgShit1"
-            android:layout_marginLeft="30dp"
-            android:layout_marginTop="-20dp"
-            />
 
-        <ImageView
-            android:id="@+id/imgShit4"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/shit_happen"
-            android:layout_above="@id/imgShit3"
-            android:layout_toEndOf="@id/imgShit1"
-            android:layout_marginLeft="50dp"
-            android:layout_marginBottom="20dp"
-            />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Happiness"
+        android:gravity="center"
+        android:fontFamily="@font/chewy_regular"
+        android:textColor="@color/back_D0D"
+        android:textSize="16dp"
+        android:letterSpacing="0.15"
+        android:layout_alignTop="@id/happinessProgress"
+        android:layout_alignBottom="@id/happinessProgress"
+        android:layout_alignLeft="@id/happinessProgress"
+        android:layout_alignRight="@id/happinessProgress"
+        />
+    <ImageView
+        android:id="@+id/imgShit1"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/shit_happen"
+        android:layout_alignBottom="@id/imgCharacter"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="-40dp"
+        />
+    <ImageView
+        android:id="@+id/imgShit2"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/shit_happen"
+        android:layout_alignTop="@id/imgShit1"
+        android:layout_toStartOf="@id/imgShit1"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="-20dp"
+        />
+    <ImageView
+        android:id="@+id/imgShit3"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/shit_happen"
+        android:layout_alignTop="@id/imgShit1"
+        android:layout_toEndOf="@id/imgShit1"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="-20dp"
+        />
 
-        <ImageView
-            android:id="@+id/imgShit5"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/shit_happen"
-            android:layout_above="@id/imgShit2"
-            android:layout_toStartOf="@+id/imgShit1"
-            android:layout_marginRight="50dp"
-            android:layout_marginBottom="20dp"
-            />
+    <ImageView
+        android:id="@+id/imgShit4"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/shit_happen"
+        android:layout_above="@id/imgShit3"
+        android:layout_toEndOf="@id/imgShit1"
+        android:layout_marginLeft="50dp"
+        android:layout_marginBottom="20dp"
+        />
+
+    <ImageView
+        android:id="@+id/imgShit5"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/shit_happen"
+        android:layout_above="@id/imgShit2"
+        android:layout_toStartOf="@+id/imgShit1"
+        android:layout_marginRight="50dp"
+        android:layout_marginBottom="20dp"
+        />
 
     <LinearLayout
+        android:id="@+id/lLayoutActionMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -167,11 +195,31 @@
             android:src="@drawable/feed"
             />
         <ImageView
-            android:id="@+id/play"
+            android:id="@+id/imgPlay"
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_weight="1"
             android:src="@drawable/play"
             />
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/fLayout_BallGame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/healthProgress"
+        android:layout_alignLeft="@+id/lLayoutActionMenu"
+        android:layout_alignRight="@+id/lLayoutActionMenu"
+        android:layout_alignBottom="@+id/lLayoutActionMenu"
+        >
+        <ImageView
+            android:id="@+id/imgPlayBall"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/playball"
+            />
+    </FrameLayout>
+
+
 </RelativeLayout>
