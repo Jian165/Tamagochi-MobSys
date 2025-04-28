@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PetCreation">
+    <View
+        android:id="@+id/oragebarView"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:background="@color/blue_a8f"
+        />
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/createPetTab"
+        android:layout_width="match_parent"
+        app:tabIndicatorFullWidth="true"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/oragebarView"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabIndicatorGravity="stretch"
+        app:tabSelectedTextColor="@color/white"
+        app:tabIndicatorColor="@color/blue_a8f"
+        app:tabIndicatorAnimationMode="elastic"
+        app:tabIndicator="@drawable/bg_buttomround_orange"
+        >
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/createNewPetTabItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create New Pet"
+            />
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/co_parentPetTabItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Co-Parent"
+            />
+    </com.google.android.material.tabs.TabLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/createPetTabView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/createPetTab"
+        />
+
+</RelativeLayout>

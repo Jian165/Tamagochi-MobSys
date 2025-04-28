@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
         android:layout_alignBottom="@id/imgCharacter"
-        android:layout_marginBottom="-120dp"
+        android:layout_marginBottom="-50dp"
         android:padding="0dp"
         android:src="@drawable/room"
         android:scaleType="centerCrop"
@@ -71,20 +71,21 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="12dp"
         />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Health"
-        android:gravity="center"
-        android:fontFamily="@font/chewy_regular"
-        android:textColor="@color/back_D0D"
-        android:textSize="16dp"
-        android:letterSpacing="0.15"
-        android:layout_alignTop="@id/healthProgress"
-        android:layout_alignBottom="@id/healthProgress"
         android:layout_alignLeft="@id/healthProgress"
+        android:layout_alignTop="@id/healthProgress"
         android:layout_alignRight="@id/healthProgress"
-        />
+        android:layout_alignBottom="@id/healthProgress"
+        android:fontFamily="@font/chewy_regular"
+        android:gravity="center"
+        android:letterSpacing="0.15"
+        android:text="Health"
+        android:textColor="@color/back_D0D"
+        android:textSize="16dp" />
+
     <ProgressBar
         android:id="@+id/happinessProgress"
         android:layout_width="match_parent"

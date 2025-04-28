@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,10 +28,12 @@ public class Dashboard extends AppCompatActivity {
     private int screenHeight;
     private boolean isIdle = false, isPlayBallIn = false;
     private Runnable runnable,ballGameLoop;
-    private ArrayList<Integer> charachterIdleImages,characterDeadImages,shitCollected;
-    private int idleImgIndex = 0,deadImgIndex = 0;
+    private ArrayList<Integer> charachterIdleImages,characterDeadImages,catIdleImages,catDeadImages,dogIdleImages,dogDeadImages,shitCollected;
+    private int idleImgIndex = 0,deadImgIndex = 0,eatingImg;
 
     private boolean isCharacterAlive;
+
+    private boolean isCat=false;
 
     private Handler handler =  new Handler();
     @Override
@@ -45,9 +46,10 @@ public class Dashboard extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        hideSystemUI();
+        HideSystemUI();
         LoadComponents();
         CheckHealth();
+        CheckCharacter();
     }
 
     private View.OnLongClickListener itemClickListiner(){
@@ -111,7 +113,7 @@ public class Dashboard extends AppCompatActivity {
                     case DragEvent.ACTION_DRAG_ENTERED:
                         if(view.getId() == R.id.imgFeed) {
                            stopIdle();
-                           characterImg.setImageResource(R.drawable.eating);
+                               characterImg.setImageResource(eatingImg);
                         }
                         break;
                     case DragEvent.ACTION_DRAG_EXITED:
@@ -146,6 +148,20 @@ public class Dashboard extends AppCompatActivity {
         };
     }
 
+    private void CheckCharacter(){
+        if(isCat){
+            charachterIdleImages = catIdleImages;
+            characterDeadImages = catDeadImages;
+            eatingImg = R.drawable.eating;
+        }
+        else{
+            charachterIdleImages = dogIdleImages;
+            characterDeadImages = dogDeadImages;
+            eatingImg = R.drawable.dog_eat;
+        }
+
+    }
+
     private void CheckHealth(){
         if(healthProg.getProgress()<=10){
             DeadAnimation();
@@ -165,29 +181,55 @@ public class Dashboard extends AppCompatActivity {
         healthProg.setProgress(healthProg.getProgress()+health);
     }
     private void LoadComponents(){
-        charachterIdleImages = new ArrayList<>();
-        charachterIdleImages.add(R.drawable.idle_1);
-        charachterIdleImages.add(R.drawable.idle_2);
-        charachterIdleImages.add(R.drawable.idle_3);
-        charachterIdleImages.add(R.drawable.idle_4);
-        charachterIdleImages.add(R.drawable.idle_5);
-        charachterIdleImages.add(R.drawable.idle_6);
-        charachterIdleImages.add(R.drawable.idle_7);
-        charachterIdleImages.add(R.drawable.idle_8);
-        charachterIdleImages.add(R.drawable.idle_9);
-        charachterIdleImages.add(R.drawable.idle_10);
 
-        characterDeadImages = new ArrayList<>();
-        characterDeadImages.add(R.drawable.dead_1);
-        characterDeadImages.add(R.drawable.dead_2);
-        characterDeadImages.add(R.drawable.dead_3);
-        characterDeadImages.add(R.drawable.dead_4);
-        characterDeadImages.add(R.drawable.dead_5);
-        characterDeadImages.add(R.drawable.dead_6);
-        characterDeadImages.add(R.drawable.dead_7);
-        characterDeadImages.add(R.drawable.dead_8);
-        characterDeadImages.add(R.drawable.dead_9);
-        characterDeadImages.add(R.drawable.dead_10);
+        catIdleImages = new ArrayList<>();
+        catIdleImages.add(R.drawable.idle_1);
+        catIdleImages.add(R.drawable.idle_2);
+        catIdleImages.add(R.drawable.idle_3);
+        catIdleImages.add(R.drawable.idle_4);
+        catIdleImages.add(R.drawable.idle_5);
+        catIdleImages.add(R.drawable.idle_6);
+        catIdleImages.add(R.drawable.idle_7);
+        catIdleImages.add(R.drawable.idle_8);
+        catIdleImages.add(R.drawable.idle_9);
+        catIdleImages.add(R.drawable.idle_10);
+
+        dogIdleImages = new ArrayList<>();
+        dogIdleImages.add(R.drawable.dog_idle1);
+        dogIdleImages.add(R.drawable.dog_idle2);
+        dogIdleImages.add(R.drawable.dog_idle3);
+        dogIdleImages.add(R.drawable.dog_idle4);
+        dogIdleImages.add(R.drawable.dog_idle5);
+        dogIdleImages.add(R.drawable.dog_idle6);
+        dogIdleImages.add(R.drawable.dog_idle7);
+        dogIdleImages.add(R.drawable.dog_idle8);
+        dogIdleImages.add(R.drawable.dog_idle9);
+        dogIdleImages.add(R.drawable.dog_idle10);
+
+        catDeadImages = new ArrayList<>();
+        catDeadImages.add(R.drawable.dead_1);
+        catDeadImages.add(R.drawable.dead_2);
+        catDeadImages.add(R.drawable.dead_3);
+        catDeadImages.add(R.drawable.dead_4);
+        catDeadImages.add(R.drawable.dead_5);
+        catDeadImages.add(R.drawable.dead_6);
+        catDeadImages.add(R.drawable.dead_7);
+        catDeadImages.add(R.drawable.dead_8);
+        catDeadImages.add(R.drawable.dead_9);
+        catDeadImages.add(R.drawable.dead_10);
+
+        dogDeadImages = new ArrayList<>();
+        dogDeadImages.add(R.drawable.dog_dead1);
+        dogDeadImages.add(R.drawable.dog_dead2);
+        dogDeadImages.add(R.drawable.dog_dead3);
+        dogDeadImages.add(R.drawable.dog_dead4);
+        dogDeadImages.add(R.drawable.dog_dead5);
+        dogDeadImages.add(R.drawable.dog_dead6);
+        dogDeadImages.add(R.drawable.dog_dead7);
+        dogDeadImages.add(R.drawable.dog_dead8);
+        dogDeadImages.add(R.drawable.dog_dead9);
+        dogDeadImages.add(R.drawable.dog_dead10);
+
 
         shitCollected = new ArrayList<>();
 
@@ -274,8 +316,8 @@ public class Dashboard extends AppCompatActivity {
                     handler.postDelayed(this,60);
                 }
             };
-            isIdle = true;
             handler.post(runnable);
+            isIdle = true;
         }
     }
     private void adjustShadow(int shadowMargin){
@@ -316,7 +358,7 @@ public class Dashboard extends AppCompatActivity {
             isIdle = false;
         }
     }
-    private void hideSystemUI() {
+    private void HideSystemUI() {
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY

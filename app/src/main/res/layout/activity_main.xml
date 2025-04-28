@@ -5,23 +5,230 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/BtnPlay"
+    tools:context=".MainActivity"
+    >
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/housefront"
+        />
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Play"
-        android:textSize="64dp"
-        android:background="#FF5722"
-        android:paddingRight="50dp"
-        android:paddingLeft="50dp"
-        android:layout_centerInParent="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/woodbackground"
+        android:scaleType="fitXY"
+        android:layout_alignRight="@id/title"
+        android:layout_alignLeft="@id/title"
+        android:layout_alignBottom="@id/title"
+        android:layout_alignTop="@id/title"
         />
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="@font/chewy_regular"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:textSize="60dp"
+        android:padding="10dp"
+        android:text="Tamagochi"
+        android:letterSpacing="0.08"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        android:textColor="@color/blue_f54"
+        android:layout_marginTop="40dp"
+        />
+
+    <EditText
+        android:id="@+id/usernameEdt"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_alignLeft="@+id/title"
+        android:layout_alignRight="@+id/title"
+        android:layout_below="@id/title"
+        android:background="@drawable/bg_textfield1"
+        android:layout_marginTop="20dp"
+        android:hint="Email"
+        android:singleLine="true"
+        android:textSize="16dp"
+        android:inputType="textEmailAddress"
+        android:paddingLeft="52dp"
+        />
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_person"
+        android:layout_alignTop="@id/usernameEdt"
+        android:layout_alignLeft="@id/usernameEdt"
+        android:layout_alignBottom="@id/usernameEdt"
+        android:layout_margin="8dp"
+        />
+
+    <EditText
+        android:id="@+id/passwordEdt"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_alignLeft="@+id/usernameEdt"
+        android:layout_alignRight="@+id/usernameEdt"
+        android:layout_below="@+id/usernameEdt"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_textfield1"
+        android:hint="Password"
+        android:textSize="16dp"
+        android:singleLine="true"
+        android:inputType="textPassword"
+        android:paddingLeft="52dp"
+        />
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_lock"
+        android:layout_alignTop="@id/passwordEdt"
+        android:layout_alignLeft="@id/passwordEdt"
+        android:layout_alignBottom="@id/passwordEdt"
+        android:layout_margin="8dp"
+        />
+
+    <TextView
+        android:id="@+id/forgetPasswordTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/chewy_regular"
+        android:text="Forgot password"
+        android:textColor="@color/back_D0D"
+        android:layout_below="@id/passwordEdt"
+        android:layout_alignLeft="@+id/passwordEdt"
+        android:layout_alignRight="@+id/passwordEdt"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="4dp"
+        />
+    <ImageView
+        android:layout_width="25dp"
+        android:layout_height="20dp"
+        android:elevation="11dp"
+        android:src="@drawable/whitedots"
+        android:layout_alignTop="@id/loginButton"
+        android:layout_alignLeft="@id/loginButton"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="2dp"
+        />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/loginButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/forgetPasswordTxt"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginRight="40dp"
+        android:background="@drawable/bg_gradient_round_rec"
+        android:fontFamily="@font/chewy_regular"
+        android:letterSpacing="0.1"
+        android:text="LOGIN"
+        android:textSize="20dp" />
+
+    <ImageView
+        android:layout_width="25dp"
+        android:layout_height="20dp"
+        android:elevation="11dp"
+        android:src="@drawable/whitedots"
+        android:layout_alignTop="@id/registerButton"
+        android:layout_alignLeft="@id/registerButton"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="2dp"
+        />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/registerButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_gradient_round_rec"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="40dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginBottom="80dp"
+        android:textSize="20dp"
+        android:letterSpacing="0.1"
+        android:text="register"
+        android:fontFamily="@font/chewy_regular"
+        />
+
+    <TextView
+        android:id="@+id/orTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="or"
+        android:fontFamily="@font/chewy_regular"
+        android:textColor="#565454"
+        android:textSize="16dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/loginButton"
+        android:layout_marginTop="24dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginLeft="4dp"
+        android:letterSpacing="0.05"
+        />
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="2dp"
+        android:background="#565454"
+        android:alpha="0.5"
+        android:layout_toEndOf="@id/orTxt"
+        android:layout_alignTop="@id/orTxt"
+        android:layout_alignBottom="@id/orTxt"
+        android:layout_alignRight="@+id/passwordEdt"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        />
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="2dp"
+        android:background="#565454"
+        android:alpha="0.5"
+        android:layout_toStartOf="@id/orTxt"
+        android:layout_alignTop="@id/orTxt"
+        android:layout_alignBottom="@id/orTxt"
+        android:layout_alignLeft="@+id/passwordEdt"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/orTxt"
+        android:layout_marginTop="10dp"
+        android:layout_alignRight="@+id/loginButton"
+        android:layout_alignLeft="@+id/loginButton"
+        android:gravity="center"
+        >
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="fitCenter"
+            android:padding="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/bg_gradient_round_oval"
+            android:src="@drawable/ic_google"
+            />
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="fitCenter"
+            android:padding="10dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_gradient_round_oval"
+            android:src="@drawable/ic_email"
+            />
+    </LinearLayout>
+
+
+
 
 
 </RelativeLayout>
