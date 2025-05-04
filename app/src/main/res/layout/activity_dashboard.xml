@@ -5,222 +5,41 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/blue_080"
     tools:context=".Dashboard"
     >
-    <ImageView
-        android:id="@+id/imgBackground"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/vp2Dashboard"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        android:layout_alignBottom="@id/imgCharacter"
-        android:layout_marginBottom="-50dp"
-        android:padding="0dp"
-        android:src="@drawable/room"
-        android:scaleType="centerCrop"
         />
-    <ImageView
-        android:id="@+id/imgShadow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/shadow"
-        android:layout_alignBottom="@id/imgCharacter"
-        android:layout_alignLeft="@id/imgCharacter"
-        android:layout_alignRight="@id/imgCharacter"
-        android:layout_marginBottom="30dp"
-        />
-    <ImageView
-        android:id="@+id/imgCharacter"
-        android:layout_width="400dp"
-        android:layout_height="400dp"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/idle_1"
-        />
-    <ImageView
-        android:id="@+id/healthImg"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/ic_health"
-        android:layout_above="@+id/imgCharacter"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="80dp"
-        />
-
-    <ProgressBar
-        android:id="@+id/healthProgress"
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tlDashboardMenu"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:progressDrawable="@drawable/bg_health"
-        android:layout_alignTop="@id/healthImg"
-        android:layout_alignBottom="@id/healthImg"
-        android:layout_alignRight="@id/imgCharacter"
-        android:layout_toEndOf="@+id/healthImg"
+        android:background="@drawable/bg_gradient_round_rec_2"
+        app:tabMode="fixed"
+        app:tabIconTint="@color/tab_icon_color"
+        app:tabIndicatorColor="@color/blue_080"
+        android:layout_marginTop="20dp"
         android:layout_marginRight="20dp"
-        />
-
-    <ImageView
-        android:id="@+id/happyImg"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/ic_happiness"
-        android:layout_above="@+id/healthImg"
-        android:layout_alignLeft="@+id/healthImg"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="12dp"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/healthProgress"
-        android:layout_alignTop="@id/healthProgress"
-        android:layout_alignRight="@id/healthProgress"
-        android:layout_alignBottom="@id/healthProgress"
-        android:fontFamily="@font/chewy_regular"
-        android:gravity="center"
-        android:letterSpacing="0.15"
-        android:text="Health"
-        android:textColor="@color/back_D0D"
-        android:textSize="16dp" />
-
-    <ProgressBar
-        android:id="@+id/happinessProgress"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:progressDrawable="@drawable/bg_happiness"
-        android:layout_alignTop="@id/happyImg"
-        android:layout_alignBottom="@id/happyImg"
-        android:layout_alignRight="@id/healthProgress"
-        android:layout_toEndOf="@+id/happyImg"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Happiness"
-        android:gravity="center"
-        android:fontFamily="@font/chewy_regular"
-        android:textColor="@color/back_D0D"
-        android:textSize="16dp"
-        android:letterSpacing="0.15"
-        android:layout_alignTop="@id/happinessProgress"
-        android:layout_alignBottom="@id/happinessProgress"
-        android:layout_alignLeft="@id/happinessProgress"
-        android:layout_alignRight="@id/happinessProgress"
-        />
-    <ImageView
-        android:id="@+id/imgShit1"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/shit_happen"
-        android:layout_alignBottom="@id/imgCharacter"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="-40dp"
-        />
-    <ImageView
-        android:id="@+id/imgShit2"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/shit_happen"
-        android:layout_alignTop="@id/imgShit1"
-        android:layout_toStartOf="@id/imgShit1"
-        android:layout_marginRight="30dp"
-        android:layout_marginTop="-20dp"
-        />
-    <ImageView
-        android:id="@+id/imgShit3"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/shit_happen"
-        android:layout_alignTop="@id/imgShit1"
-        android:layout_toEndOf="@id/imgShit1"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="-20dp"
-        />
-
-    <ImageView
-        android:id="@+id/imgShit4"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/shit_happen"
-        android:layout_above="@id/imgShit3"
-        android:layout_toEndOf="@id/imgShit1"
-        android:layout_marginLeft="50dp"
-        android:layout_marginBottom="20dp"
-        />
-
-    <ImageView
-        android:id="@+id/imgShit5"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/shit_happen"
-        android:layout_above="@id/imgShit2"
-        android:layout_toStartOf="@+id/imgShit1"
-        android:layout_marginRight="50dp"
-        android:layout_marginBottom="20dp"
-        />
-
-    <LinearLayout
-        android:id="@+id/lLayoutActionMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_below="@id/imgBackground"
-        android:layout_alignLeft="@+id/imgCharacter"
-        android:layout_alignRight="@+id/imgCharacter"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:layout_marginTop="80dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
+        android:layout_marginLeft="20dp"
         >
-        <ImageView
-            android:id="@+id/imgClean"
-            android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:layout_weight="1"
-            android:src="@drawable/clean"
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_house_solid"
+            />
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_shop_solid"
+            />
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_bars_solid"
             />
 
-        <ImageView
-            android:id="@+id/imgFeed"
-            android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:layout_weight="1"
-            android:src="@drawable/feed"
-            />
-        <ImageView
-            android:id="@+id/imgPlay"
-            android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:layout_weight="1"
-            android:src="@drawable/play"
-            />
-    </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/fLayout_BallGame"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/healthProgress"
-        android:layout_alignLeft="@+id/lLayoutActionMenu"
-        android:layout_alignRight="@+id/lLayoutActionMenu"
-        android:layout_alignBottom="@+id/lLayoutActionMenu"
-        >
-        <ImageView
-            android:id="@+id/imgPlayBall"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/playball"
-            />
-    </FrameLayout>
-
+    </com.google.android.material.tabs.TabLayout>
 
 </RelativeLayout>

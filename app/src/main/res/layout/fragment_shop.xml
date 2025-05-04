@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Shop">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/blue_080"
+        >
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/woodbackground"
+            android:scaleType="fitXY"
+            android:layout_alignTop="@id/shoplbl"
+            android:layout_alignBottom="@id/shoplbl"
+            android:layout_alignLeft="@id/shoplbl"
+            android:layout_alignRight="@id/shoplbl"
+            />
+        <TextView
+            android:id="@+id/shoplbl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Shop"
+            android:textSize="48dp"
+            android:textColor="@color/blue_E2A"
+            android:textAlignment="center"
+            android:fontFamily="@font/chewy_regular"
+            android:letterSpacing="0.05"
+            android:padding="10dp"
+            android:layout_marginTop="70dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            />
+        <ImageView
+            android:id="@+id/recyclerContainerImg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/bg_line_stroke"
+            android:layout_below="@+id/shoplbl"
+            android:layout_alignLeft="@+id/shoplbl"
+            android:layout_alignRight="@+id/shoplbl"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="8dp"
+            />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/shopRecyclerView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/recyclerContainerImg"
+            android:layout_alignBottom="@+id/recyclerContainerImg"
+            android:layout_alignLeft="@+id/recyclerContainerImg"
+            android:layout_alignRight="@+id/recyclerContainerImg"
+            android:layout_margin="8dp"
+            />
+
+
+
+    </RelativeLayout>
+
+</FrameLayout>

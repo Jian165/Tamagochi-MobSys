@@ -43,7 +43,7 @@
                     android:text="Enter Co-parent Code"
                     android:textSize="20dp"
                     android:textAlignment="center"
-                    android:textColor="@color/back_D0D"
+                    android:textColor="@color/black_D0D"
                     android:fontFamily="@font/chewy_regular"
                     android:letterSpacing="0.08"
                     />
