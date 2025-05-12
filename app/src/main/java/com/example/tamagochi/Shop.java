@@ -74,16 +74,16 @@ public class Shop extends Fragment implements RecyclerViewInterface {
         foodPrice.add(28);
 
         ArrayList<Integer> foodHealth = new ArrayList<>();
-        foodHealth.add(5);
-        foodHealth.add(2);
-        foodHealth.add(3);
-        foodHealth.add(1);
-        foodHealth.add(4);
-        foodHealth.add(1);
-        foodHealth.add(0);
+        foodHealth.add(10);
+        foodHealth.add(7);
+        foodHealth.add(8);
         foodHealth.add(6);
-        foodHealth.add(2);
-        foodHealth.add(2);
+        foodHealth.add(9);
+        foodHealth.add(6);
+        foodHealth.add(5);
+        foodHealth.add(11);
+        foodHealth.add(7);
+        foodHealth.add(7);
 
         ArrayList<Integer> foodHappiness = new ArrayList<>();
         foodHappiness.add(2);

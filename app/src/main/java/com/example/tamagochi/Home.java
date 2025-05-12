@@ -16,6 +16,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -29,17 +30,17 @@ public class Home extends Fragment {
     private ProgressBar healthProg, happinessProg;
     private FrameLayout playBallArea;
     private TextView quantity;
+    private static final int animationFrames = 60;
 
     private float velocity = 0, gravity = 0.7f, jumpStrangth = -16f;
     private int screenHeight;
     private boolean isPlayBallIn = false;
-    private Runnable runnable, ballGameLoop, healthDecey,happyDecay,cleanlinessDicay;
+    private Runnable petIdle,petDied, ballGameLoop, healthDecey,happyDecay, cleanlinessDecay;
     private ArrayList<Integer> charachterIdleImages, characterDeadImages, catIdleImages, catDeadImages, dogIdleImages, dogDeadImages;
     private ArrayList<ImageView> shitArrayList;
     private ArrayList<ShopItemModel> foodInStorage;
     private int foodItemIndexSelected = 0, healthStatInc = 0, happyStatcInc = 0, idleImgIndex = 0, deadImgIndex = 0, eatingImg;
 
-    private boolean isCharacterAlive, isCat;
     private Random random;
 
     MediaPlayer mediaPlayer;
@@ -56,9 +57,6 @@ public class Home extends Fragment {
         CheckHealth();
         UpdateShitImages();
         SetFoodStorage();
-        StartCleanDecay();
-        StartHappyDecay();
-        StartHealthDecay();
         healthProg.setProgress(PetInfoModel.getHealth());
         happinessProg.setProgress(PetInfoModel.getHappy());
         mediaPlayer = MediaPlayer.create(getContext(), R.raw.ballhit);
@@ -66,22 +64,6 @@ public class Home extends Fragment {
     }
 
 
-    public void SetFoodStorage() {
-        if (PetInfoModel.foodStuck.size() <= 0) {
-            feedImg.setImageResource(R.drawable.feed);
-            quantity.setVisibility(View.INVISIBLE);
-            healthStatInc = 0;
-            happyStatcInc = 0;
-        } else {
-            Set<ShopItemModel> foodKeys = PetInfoModel.foodStuck.keySet();
-            foodInStorage.addAll(foodKeys);
-            feedImg.setImageResource(foodInStorage.get(foodItemIndexSelected).getItemImage());
-            quantity.setVisibility(View.VISIBLE);
-            quantity.setText(PetInfoModel.foodStuck.get(foodInStorage.get(foodItemIndexSelected)).toString());
-            healthStatInc = foodInStorage.get(foodItemIndexSelected).getHealthStat();
-            happyStatcInc = foodInStorage.get(foodItemIndexSelected).getHappyStat();
-        }
-    }
 
 
     private View.OnLongClickListener itemClickListiner() {
@@ -179,7 +161,8 @@ public class Home extends Fragment {
                 switch (dragEvent) {
                     case DragEvent.ACTION_DRAG_ENTERED:
                         if (view.getId() == R.id.imgFeed) {
-                            stopIdle();
+                            StopIdle();
+                            StopDead();
                             characterImg.setImageResource(eatingImg);
                         }
                         break;
@@ -196,11 +179,12 @@ public class Home extends Fragment {
                                 PetInfoModel.foodStuck.put(foodInStorage.get(foodItemIndexSelected), PetInfoModel.foodStuck.get(foodInStorage.get(foodItemIndexSelected)) - 1);
                                 if (PetInfoModel.foodStuck.get(foodInStorage.get(foodItemIndexSelected)) <= 0) {
                                     PetInfoModel.foodStuck.remove(foodInStorage.get(foodItemIndexSelected));
+                                    foodInStorage.remove(foodItemIndexSelected);
+                                    foodItemIndexSelected=PetInfoModel.foodStuck.size()-1;
                                 }
                                 SetFoodStorage();
                             }
                             CheckHealth();
-
                         }
                         if (view.getId() == R.id.imgPlay) {
                             if (!isPlayBallIn) {
@@ -224,9 +208,26 @@ public class Home extends Fragment {
         };
     }
 
+    public void SetFoodStorage() {
+        if (PetInfoModel.foodStuck.size() <=0) {
+            feedImg.setImageResource(R.drawable.feed);
+            quantity.setVisibility(View.INVISIBLE);
+            healthStatInc = 0;
+            happyStatcInc = 0;
+        } else {
+            Set<ShopItemModel> foodKeys = PetInfoModel.foodStuck.keySet();
+            foodInStorage.addAll(foodKeys);
+            System.out.println(foodItemIndexSelected);
+            feedImg.setImageResource(foodInStorage.get(foodItemIndexSelected).getItemImage());
+            quantity.setVisibility(View.VISIBLE);
+            int numQuantity = PetInfoModel.foodStuck.get(foodInStorage.get(foodItemIndexSelected));
+            quantity.setText(""+numQuantity);
+            healthStatInc = foodInStorage.get(foodItemIndexSelected).getHealthStat();
+            happyStatcInc = foodInStorage.get(foodItemIndexSelected).getHappyStat();
+        }
+    }
     private void CheckCharacter() {
-        isCat = PetInfoModel.isIsCat();
-        if (isCat) {
+        if (PetInfoModel.isIsCat()) {
             charachterIdleImages = catIdleImages;
             characterDeadImages = catDeadImages;
             eatingImg = R.drawable.eating;
@@ -243,26 +244,72 @@ public class Home extends Fragment {
     }
 
     private void CheckHealth() {
-        if (PetInfoModel.getHealth() <= 0) {
+        StopDead();
+        StopIdle();
+        if (PetInfoModel.getHealth() <= 0 ) {
+            PetInfoModel.setIsAlive(false);
             DeadAnimation();
         } else {
+            if(!PetInfoModel.isIsAlive())
+            {
+                Toast.makeText(getContext(), PetInfoModel.getPetName()+" Is Alive", Toast.LENGTH_SHORT).show();
+                StartCleanDecay();
+                StartHappyDecay();
+                StartHealthDecay();
+            }
+            PetInfoModel.setIsAlive(true);
             PlayIdle();
         }
     }
 
     private void HappinessUpdate(int happy) {
-        if (PetInfoModel.getHappy() < 100) {
-            PetInfoModel.setHappy(PetInfoModel.getHappy() + happy);
+        if (PetInfoModel.getHappy() <= 100) {
+            int result ;
+            if((PetInfoModel.getHappy() + happy)>0)
+            {
+                if((PetInfoModel.getHappy()+happy)>100)
+                {
+                    result = 100;
+                }
+                else
+                {
+                    result = PetInfoModel.getHappy() + happy;
+                }
+            }
+            else
+            {
+                result = 0;
+            }
+            PetInfoModel.setHappy(result);
         }
         happinessProg.setProgress(PetInfoModel.getHappy());
     }
 
     private void HealthUpdate(int health) {
-        if (PetInfoModel.getHealth() < 100) {
-            PetInfoModel.setHealth(PetInfoModel.getHealth() + health);
+        if (PetInfoModel.getHealth() <= 100) {
+            int result ;
+            if((PetInfoModel.getHealth() + health)>0)
+            {
+                if((PetInfoModel.getHealth()+health)>100)
+                {
+                    result = 100;
+                }
+                else
+                {
+                    result = PetInfoModel.getHealth() + health;
+                }
+            }
+            else
+            {
+                result = 0;
+            }
+            PetInfoModel.setHealth(result);
         }
-        CheckHealth();
         healthProg.setProgress(PetInfoModel.getHealth());
+        System.out.println(PetInfoModel.getHealth());
+        System.out.println(healthProg.getProgress());
+
+        CheckHealth();
     }
 
     private void LoadComponents() {
@@ -434,20 +481,20 @@ public class Home extends Fragment {
     }
 
     private void StartCleanDecay() {
-        cleanlinessDicay = new Runnable() {
+        cleanlinessDecay = new Runnable() {
             @Override
             public void run() {
-                handler.postDelayed(this,18000);
+                handler.postDelayed(this,17000);
                 ShitSpawner();
             }
         };
-        handler.post(cleanlinessDicay);
+        handler.post(cleanlinessDecay);
     }
     private void StartHappyDecay () {
         happyDecay = new Runnable() {
             @Override
             public void run() {
-                handler.postDelayed(this,12000);
+                handler.postDelayed(this,9000);
                 if(PetInfoModel.getHappy()>0)
                 {
                     random = new Random();
@@ -462,10 +509,12 @@ public class Home extends Fragment {
         healthDecey = new Runnable() {
             @Override
             public void run() {
-                handler.postDelayed(this,6000);
+                handler.postDelayed(this,18000);
                 if(PetInfoModel.getHealth()>0)
                 {
-                    HealthUpdate(-1 * 5);
+                    random = new Random();
+                    int healthDecay = random.nextInt(5)+1;
+                    HealthUpdate(-(healthDecay * 2));
                 }
             }
         };
@@ -524,24 +573,6 @@ public class Home extends Fragment {
         isPlayBallIn = false;
     }
 
-
-    private void PlayIdle()
-    {
-        adjustShadow(30);
-        if(!PetInfoModel.isIsAlive()) {
-            PetInfoModel.setIsAlive(true);
-            runnable = new Runnable() {
-                @Override
-                public void run() {
-                    characterImg.setImageResource(charachterIdleImages.get(idleImgIndex));
-                    idleImgIndex = (idleImgIndex +1)%charachterIdleImages.size();
-                    handler.postDelayed(this,60);
-                }
-            };
-            handler.post(runnable);
-            PetInfoModel.setIsAlive(true);
-        }
-    }
     private void adjustShadow(int shadowMargin){
         int dp = (int) (shadowMargin * getResources().getDisplayMetrics().density + 0.5f);
         ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) shadowImg.getLayoutParams();
@@ -549,40 +580,77 @@ public class Home extends Fragment {
         shadowImg.setLayoutParams(params);
     }
 
+    private void PlayIdle()
+    {
+        adjustShadow(30);
+        if(PetInfoModel.isIsAlive())
+        {
+            petIdle = new Runnable() {
+                @Override
+                public void run() {
+                    characterImg.setImageResource(charachterIdleImages.get(idleImgIndex));
+                    idleImgIndex = (idleImgIndex +1)%charachterIdleImages.size();
+                    handler.postDelayed(this,animationFrames);
+                }
+            };
+            handler.post(petIdle);
+        }
+    }
+
     private void DeadAnimation()
     {
         adjustShadow(40);
-        if(PetInfoModel.isIsAlive()){
-            stopIdle();
-            PetInfoModel.setIsAlive(false);
+        if(!PetInfoModel.isIsAlive())
+        {
+            petDied = new Runnable() {
+                @Override
+                public void run() {
+                    if(deadImgIndex+1<characterDeadImages.size())
+                    {
+                        deadImgIndex++;
+                        characterImg.setImageResource(characterDeadImages.get(deadImgIndex));
+                    }
+                    handler.postDelayed(this,animationFrames);
+                    if(deadImgIndex+1>=characterDeadImages.size())
+                    {
+                        deadImgIndex=0;
+                        Toast.makeText(getContext(), PetInfoModel.getPetName()+" is Dead", Toast.LENGTH_SHORT).show();
+                        HappinessUpdate(-PetInfoModel.getHappy());
+                        StopDead();
+                        StopHealthDecay();
+                        StopHappyDecay();
+                        StopCleanlinessDecay();
+                    }
+                }
+            };
+            handler.post(petDied);
         }
-        runnable = new Runnable() {
-            @Override
-            public void run() {
-                characterImg.setImageResource(characterDeadImages.get(deadImgIndex));
-                if(deadImgIndex+1<characterDeadImages.size())
-                {
-                    deadImgIndex++;
-                    handler.postDelayed(this,60);
-                }
-                else{
-                    handler.removeCallbacks(runnable);
-                }
-            }
-        };
-        handler.post(runnable);
     }
 
-    private void stopIdle(){
-        if(PetInfoModel.isIsAlive()) {
-            handler.removeCallbacks(runnable);
-            PetInfoModel.setIsAlive(false);
-        }
+    private void StopDead()
+    {
+        handler.removeCallbacks(petDied);
+    }
+    private void StopIdle()
+    {
+        handler.removeCallbacks(petIdle);
     }
 
+    private void StopHealthDecay()
+    {
+        handler.removeCallbacks(healthDecey);
+    }
+    private void StopHappyDecay()
+    {
+        handler.removeCallbacks(happyDecay);
+    }
+    private void StopCleanlinessDecay()
+    {
+        handler.removeCallbacks(cleanlinessDecay);
+    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        handler.removeCallbacks(runnable);
+        handler.removeCallbacks(petIdle);
     }
 }

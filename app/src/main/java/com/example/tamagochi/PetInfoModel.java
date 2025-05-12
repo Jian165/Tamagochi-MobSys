@@ -13,6 +13,10 @@ public class PetInfoModel {
     private static int health = 0;
     private static int happy = 0;
     private static int clean = 0;
+    private static boolean isAlive = false;
+
+    public static HashMap<ShopItemModel,Integer> foodStuck = new HashMap<>();
+    public static HashMap<Integer,Boolean> shitCollection= new HashMap<>();
 
     public static int getClean() {
         return clean;
@@ -30,10 +34,6 @@ public class PetInfoModel {
         PetInfoModel.isAlive = isAlive;
     }
 
-    private static boolean isAlive;
-
-    public static HashMap<ShopItemModel,Integer> foodStuck = new HashMap<>();
-    public static HashMap<Integer,Boolean> shitCollection= new HashMap<>();
 
     public static int getHealth() {
         return health;
