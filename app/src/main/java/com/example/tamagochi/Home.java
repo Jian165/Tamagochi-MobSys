@@ -514,7 +514,7 @@ public class Home extends Fragment {
                 {
                     random = new Random();
                     int healthDecay = random.nextInt(5)+1;
-                    HealthUpdate(-(healthDecay * 2));
+                    HealthUpdate(-healthDecay);
                 }
             }
         };
