@@ -46,10 +46,10 @@
         android:id="@+id/rEmailTxt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Username"
+        android:text="Emial"
         android:fontFamily="@font/chewy_regular"
         android:layout_below="@+id/titleRegisterTxt"
-        android:layout_alignLeft="@id/rUsernameEdt"
+        android:layout_alignLeft="@id/rEmailEdt"
         android:textColor="@color/black_D0D"
         android:layout_marginTop="40dp"
         android:layout_marginLeft="10dp"
@@ -58,7 +58,7 @@
         />
 
     <EditText
-        android:id="@+id/rUsernameEdt"
+        android:id="@+id/rEmailEdt"
         android:layout_width="wrap_content"
         android:layout_height="60dp"
         android:padding="10dp"
@@ -75,7 +75,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/chewy_regular"
         android:layout_alignLeft="@id/rPasswordEdt"
-        android:layout_below="@id/rUsernameEdt"
+        android:layout_below="@id/rEmailEdt"
         android:layout_marginTop="16dp"
         android:text="Password"
         android:textColor="@color/black_D0D"

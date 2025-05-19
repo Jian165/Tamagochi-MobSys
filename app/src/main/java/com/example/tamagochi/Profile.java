@@ -17,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 public class Profile extends Fragment {
     TextView profilePetName,parentName;
     static TextView currentMoney;
@@ -60,13 +62,17 @@ public class Profile extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Logout");
         builder.setMessage("Are you sure you want to log out and close the app?");
+
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                FirebaseAuth.getInstance().signOut();
                 Intent intent = new Intent(getActivity(),MediaPlayback.class);
                 getActivity().stopService(intent);
-                finishAffinity(getActivity());
-                System.exit(0);
+                Intent mainActivityIntent = new Intent(getActivity(),MainActivity.class);
+                mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
+                startActivity(mainActivityIntent);
+
             }
         });
 
@@ -74,7 +80,7 @@ public class Profile extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                Toast.makeText(getActivity(), "Logout cancelled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Logout canceled", Toast.LENGTH_SHORT).show();
             }
         });
 

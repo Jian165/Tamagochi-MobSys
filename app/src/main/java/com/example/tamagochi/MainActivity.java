@@ -9,19 +9,30 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+
 public class MainActivity extends AppCompatActivity {
 
-    Button LoginButton, RegisterButton;
+    Button LoginButton;
+    ImageButton googleSignIn, emailSignIn;
     EditText usernameTxt,passwordTxt;
     CheckBox passwordVisibility;
     boolean hasError;
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,30 +51,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 hasError=false;
-                if (usernameTxt.getText().toString().isEmpty()){
+                String username = usernameTxt.getText().toString();
+                String password = passwordTxt.getText().toString();
+                if (username.isEmpty()){
                     usernameTxt.setError("Enter Username");
                     hasError = true;
                 }
-                if (passwordTxt.getText().toString().isEmpty()){
+                if (password.isEmpty()){
                     passwordTxt.setError("Enter Username");
                     hasError = true;
                 }
-                if((!usernameTxt.getText().toString().equals(CridentialsModel.getUsername())||(!passwordTxt.getText().toString().equals(CridentialsModel.getPassword())))){
-                    System.out.println(CridentialsModel.getUsername());
-                    System.out.println(CridentialsModel.getPassword());
-                   usernameTxt.setError("User and Password doesn't match");
-                   passwordTxt.setError("User and Password doesn't match");
-                   hasError = true;
-                }
                 if(!hasError){
-                   Intent intent = new Intent(MainActivity.this, CreateNewPet.class);
-                   intent.setFlags(intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                   startActivity(intent);
+                    LoginUser(username,password);
                 }
             }
         });
 
-        RegisterButton.setOnClickListener(new View.OnClickListener() {
+
+        emailSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent registerIntent = new Intent(MainActivity.this, Register.class);
@@ -87,13 +92,41 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void LoginUser(String username, String password)
+    {
+        auth.signInWithEmailAndPassword(username,password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+            @Override
+            public void onSuccess(AuthResult authResult) {
+                Toast.makeText(MainActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, CreateNewPet.class);
+                startActivity(intent);
+                intent.setFlags(intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if(e instanceof FirebaseAuthInvalidCredentialsException)
+                {
+                    usernameTxt.setError("Invalid Email");
+                }
+                Toast.makeText(MainActivity.this, "Login Failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+
+
     private void loadComponents()
     {
+        auth =  FirebaseAuth.getInstance();
         LoginButton = findViewById(R.id.loginButton);
-        RegisterButton = findViewById(R.id.registerButton);
-        usernameTxt = findViewById(R.id.usernameEdt);
+        usernameTxt = findViewById(R.id.emialEdt);
         passwordTxt = findViewById(R.id.passwordEdt);
         passwordVisibility = findViewById(R.id.cbPasswordVisibility);
+        googleSignIn = findViewById(R.id.signInWithGoogleBtn);
+        emailSignIn = findViewById(R.id.signInWithEmailBtn);
+
     }
     private void hideSystemUI() {
         View decorView = getWindow().getDecorView();
