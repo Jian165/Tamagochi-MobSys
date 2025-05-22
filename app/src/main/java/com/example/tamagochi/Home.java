@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
@@ -18,9 +19,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
+
+import javax.xml.transform.sax.TemplatesHandler;
 
 public class Home extends Fragment {
 
@@ -44,8 +53,11 @@ public class Home extends Fragment {
     private Random random;
 
     MediaPlayer mediaPlayer;
+    private PetInfoModel petInfoModel;
+    private CredentialsModel credentialsModel;
 
     private Handler handler = new Handler();
+    int currentMoney;
 
 
     @Override
@@ -53,13 +65,7 @@ public class Home extends Fragment {
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_home, container, false);
         LoadComponents();
-        CheckCharacter();
-        CheckHealth();
-        UpdateShitImages();
-        SetFoodStorage();
-        healthProg.setProgress(PetInfoModel.getHealth());
-        happinessProg.setProgress(PetInfoModel.getHappy());
-        mediaPlayer = MediaPlayer.create(getContext(), R.raw.ballhit);
+        SetupPet();
         return view;
     }
 
@@ -140,10 +146,16 @@ public class Home extends Fragment {
                     velocity = jumpStrangth;
                     random = new Random();
                     if (PetInfoModel.isIsAlive()) {
-                        int happyMultiplier = random.nextInt(3);
+                        int happyMultiplier = random.nextInt(6);
                         HappinessUpdate(1 * happyMultiplier);
                     }
                     int moneyAdd = random.nextInt(6);
+                    int moneyChance = random.nextInt(4)+1;
+                    if(moneyChance == 2)
+                    {
+
+                    }
+
                     PetInfoModel.setMoney(PetInfoModel.getMoney() + moneyAdd);
                     Profile.updateCurrentMoney();
                 }
@@ -151,6 +163,21 @@ public class Home extends Fragment {
             }
         };
     }
+
+    private void AddMoney(int AmountToAdd)
+    {
+        DocumentReference  docPetRef = FirebaseFirestore.getInstance().collection("Pets").document(CredentialsModel.getPetDI());
+        docPetRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful())
+                {
+                    DocumentSnapshot doc =  task.getResult();
+                }
+            }
+        });
+    }
+
 
     private View.OnDragListener CharacterListener(ImageView characterImg) {
         return new View.OnDragListener() {
@@ -226,8 +253,9 @@ public class Home extends Fragment {
             happyStatcInc = foodInStorage.get(foodItemIndexSelected).getHappyStat();
         }
     }
+
     private void CheckCharacter() {
-        if (PetInfoModel.isIsCat()) {
+        if (PetInfoModel.getPetType().equals("Cat")) {
             charachterIdleImages = catIdleImages;
             characterDeadImages = catDeadImages;
             eatingImg = R.drawable.eating;
@@ -392,6 +420,7 @@ public class Home extends Fragment {
         shitArrayList.add(shit4Img);
         shitArrayList.add(shit5Img);
 
+        mediaPlayer = MediaPlayer.create(getContext(), R.raw.ballhit);
 
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -433,6 +462,44 @@ public class Home extends Fragment {
         shit5Img.setOnDragListener(shitDragListiner(shit5Img));
 
         playBallArea.setVisibility(View.GONE);
+
+    }
+    private void Setup()
+    {
+        DocumentReference  docPetRef = FirebaseFirestore.getInstance().collection("Pets").document(CredentialsModel.getPetDI());
+        docPetRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful())
+                {
+                    DocumentSnapshot doc = task.getResult();
+
+                    if(doc.exists())
+                    {
+                        String parentName =  doc.getString(getString(R.string.NAME_AS_PARENT));
+                        String petType = doc.getString(getString(R.string.PET_GENDER));
+                        String petName = doc.getString(getString(R.string.PET_NAME));
+                        boolean status =  (doc.getBoolean(getString(R.string.IS_ALIVE)) !=null) ? doc.getBoolean("IsAlive").booleanValue():false;
+                        int money  =  (doc.getLong(getString(R.string.MONEY)) !=null)? doc.getLong(getString(R.string.MONEY)).intValue():0;
+                        int health = (doc.get(getString(R.string.HEALTH)) != null)? doc.getLong(getString(R.string.HEALTH)).intValue():0;
+                        int happiness = (doc.get(getString(R.string.HAPPINESS)) != null)? doc.getLong(getString(R.string.HAPPINESS)).intValue():0;
+                        petInfoModel = new PetInfoModel(parentName,petName,petType,money,health,happiness,status);
+
+                        TemDataHandler.setUserLoggedPetInfoModel(petInfoModel);
+
+                        CheckCharacter();
+                        CheckHealth();
+                        UpdateShitImages();
+                        SetFoodStorage();
+                        healthProg.setProgress(TemDataHandler.getUserLoggedPetInfoModel().getHealth());
+                        happinessProg.setProgress(TemDataHandler.getUserLoggedPetInfoModel().getHealth());
+                        StartCleanDecay();
+                        StartHappyDecay();
+                        StartHealthDecay();
+                    }
+                }
+            }
+        });
 
     }
 
@@ -566,6 +633,27 @@ public class Home extends Fragment {
         handler.post(ballGameLoop);
     }
 
+
+    private void SetupPet()
+    {
+        DocumentReference docUserRef = FirebaseFirestore.getInstance().collection("Users").document(CredentialsModel.getCurrentUserUDI());
+        docUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful())
+                {
+                    DocumentSnapshot doc = task.getResult();
+                    if(doc.exists())
+                    {
+                        CredentialsModel.setPetDI(doc.getString("PetOwned"));
+                        PetInfoModel.setParentName(doc.getString("NameAsParent"));
+                        Setup();
+                    }
+                }
+            }
+        });
+    }
+
     private void BallGameOver()
     {
         handler.removeCallbacks(ballGameLoop);
@@ -627,6 +715,15 @@ public class Home extends Fragment {
         }
     }
 
+    private void StopThreads()
+    {
+        StopDead();
+        StopIdle();
+        StopHappyDecay();
+        StopHealthDecay();
+        StopCleanlinessDecay();
+    }
+
     private void StopDead()
     {
         handler.removeCallbacks(petDied);
@@ -651,6 +748,6 @@ public class Home extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        handler.removeCallbacks(petIdle);
+        StopThreads();
     }
 }

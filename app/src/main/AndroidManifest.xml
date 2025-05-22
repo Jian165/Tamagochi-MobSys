@@ -19,9 +19,6 @@
             android:name=".BuyFood"
             android:exported="false" />
         <activity
-            android:name=".PetCreation"
-            android:exported="false" />
-        <activity
             android:name=".Register"
             android:exported="false" />
         <activity

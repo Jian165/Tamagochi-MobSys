@@ -1,9 +1,13 @@
 package com.example.tamagochi;
 import android.content.ClipData;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,6 +33,59 @@ public class Dashboard extends AppCompatActivity {
     TabLayout dashbaordMenuTl;
     DashboardAdopter adopter;
 
+    private MediaPlayback mediaService;
+    private boolean bound = false;
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MediaPlayback.LocalBinder binder = (MediaPlayback.LocalBinder) service;
+            mediaService  = binder.getService();
+            bound = true;
+            mediaService.startMusic();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            bound = false;
+        }
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this,MediaPlayback.class);
+        bindService(intent,connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(bound && mediaService != null)
+        {
+            mediaService.startMusic();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(bound && mediaService != null)
+        {
+            mediaService.stopMusic();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(bound)
+        {
+            unbindService(connection);
+            bound = false;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,12 +100,15 @@ public class Dashboard extends AppCompatActivity {
 
         Intent serviceIntent = new Intent(this, MediaPlayback.class);
         this.startService(serviceIntent);
+
+
         dashboardVp2 = findViewById(R.id.vp2Dashboard);
         dashbaordMenuTl= findViewById(R.id.tlDashboardMenu);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         adopter = new DashboardAdopter(fragmentManager,getLifecycle());
         dashboardVp2.setAdapter(adopter);
+
         dashbaordMenuTl.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {

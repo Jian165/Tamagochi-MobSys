@@ -2,6 +2,7 @@ package com.example.tamagochi;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,9 +17,11 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.recaptcha.RecaptchaException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 
 public class Register extends AppCompatActivity {
 
@@ -102,7 +105,11 @@ public class Register extends AppCompatActivity {
                     {
                         remail.setError("Invalid Email");
                     }
-                    Toast.makeText(Register.this, "", Toast.LENGTH_SHORT).show();
+                    if(e instanceof FirebaseAuthUserCollisionException)
+                    {
+                        Toast.makeText(Register.this, "Email Already used", Toast.LENGTH_SHORT).show();
+                    }
+                    Toast.makeText(Register.this, "Register Failed!", Toast.LENGTH_SHORT).show();
                 }
             }
         });

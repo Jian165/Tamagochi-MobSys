@@ -1,86 +1,86 @@
 package com.example.tamagochi;
 
-import android.widget.ImageView;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class PetInfoModel {
-    private static String ParentName;
-    private static String PetName;
-    private static boolean isCat;
-    private static int money = 0;
-    private static int health = 0;
-    private static int happy = 0;
-    private static int clean = 0;
-    private static boolean isAlive = false;
+    public PetInfoModel(String parentName, String petName, String petType, int money, int health, int happy, boolean isAlive) {
+        this.parentName = parentName;
+        this.petName = petName;
+        this.petType = petType;
+        this.money = money;
+        this.health = health;
+        this.happy = happy;
+        this.isAlive = isAlive;
+    }
+
+    private String parentName;
+    private  String petName;
+    private  String petType ;
+    private  int money;
+    private  int health;
+    private  int happy;
+    private  int clean;
+    private  boolean isAlive;
 
     public static HashMap<ShopItemModel,Integer> foodStuck = new HashMap<>();
     public static HashMap<Integer,Boolean> shitCollection= new HashMap<>();
 
-    public static int getClean() {
-        return clean;
-    }
 
-    public static void setClean(int clean) {
-        PetInfoModel.clean = clean;
-    }
-
-    public static boolean isIsAlive() {
+    public boolean isIsAlive() {
         return isAlive;
     }
 
-    public static void setIsAlive(boolean isAlive) {
-        PetInfoModel.isAlive = isAlive;
+    public void setIsAlive(boolean isAlive) {
+        this.isAlive = isAlive;
     }
 
 
-    public static int getHealth() {
+    public int getHealth() {
         return health;
     }
 
-    public static void setHealth(int health) {
-        PetInfoModel.health = health;
+    public void setHealth(int health) {
+        this.health = health;
     }
 
-    public static int getHappy() {
+    public int getHappy() {
         return happy;
     }
 
-    public static void setHappy(int happy) {
-        PetInfoModel.happy = happy;
+    public void setHappy(int happy) {
+        this.happy = happy;
     }
 
-    public static int getMoney() {
+    public int getMoney() {
         return money;
     }
 
-    public static void setMoney(int money) {
-        PetInfoModel.money = money;
+    public void setMoney(int money) {
+        this.money = money;
     }
 
-    public static boolean isIsCat() {
-        return isCat;
+    public String getPetType() {
+        return petType;
     }
 
-    public static void setIsCat(boolean isCat) {
-        PetInfoModel.isCat = isCat;
+    public void setPetType(String petType) {
+        this.petType = petType;
     }
 
-    public static String getPetName() {
-        return PetName;
+    public String getPetName() {
+        return petName;
     }
 
-    public static void setPetName(String petName) {
-        PetName = petName;
+    public void setPetName(String petName) {
+        this.petName = petName;
     }
 
-    public static String getParentName() {
-        return ParentName;
+    public String getParentName() {
+        return parentName;
     }
 
-    public static void setParentName(String parentName) {
-        ParentName = parentName;
+    public void setParentName(String parentName) {
+        this.parentName = parentName;
     }
 
 }

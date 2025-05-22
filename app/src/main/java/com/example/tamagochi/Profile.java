@@ -1,7 +1,5 @@
 package com.example.tamagochi;
 
-import static androidx.core.app.ActivityCompat.finishAffinity;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,7 +32,7 @@ public class Profile extends Fragment {
 
         profilePetName.setText(PetInfoModel.getPetName().toString());
         parentName.setText(PetInfoModel.getParentName().toString());
-        if(PetInfoModel.isIsCat()){
+        if(PetInfoModel.getPetType().equals("Cat")){
             petProfileImg.setImageResource(R.drawable.idle_1);
         }
         else {
@@ -67,12 +65,10 @@ public class Profile extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(getActivity(),MediaPlayback.class);
-                getActivity().stopService(intent);
+                CredentialsModel.setCurrentUserUDI(null);
                 Intent mainActivityIntent = new Intent(getActivity(),MainActivity.class);
                 mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
                 startActivity(mainActivityIntent);
-
             }
         });
 

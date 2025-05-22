@@ -1,5 +1,14 @@
 <resources>
     <string name="app_name">Tamagochi</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="NAME_AS_PARENT">NameAsParent</string>
+    <string name="HAPPINESS">Happiness</string>
+    <string name="HEALTH">Health</string>
+    <string name="IS_ALIVE">IsAlive</string>
+    <string name="LAST_FED">LastFed</string>
+    <string name="MONEY">Money</string>
+    <string name="PET_GENDER">PetGender</string>
+    <string name="PET_NAME">PetName</string>
+    <string name="POOP">Poop</string>string>
 </resources>

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -19,13 +20,22 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.auth.User;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     Button LoginButton;
     ImageButton googleSignIn, emailSignIn;
@@ -33,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
     CheckBox passwordVisibility;
     boolean hasError;
     private FirebaseAuth auth;
+    static boolean isUserHasRecord;
+    private static CredentialsModel userLoggedCredentials;
+    Intent createPetActivity, dashboardActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,15 +105,27 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser user =  FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null)
+        {
+            userLoggedCredentials.setCurrentUserUDI(FirebaseAuth.getInstance().getCurrentUser().getUid());
+            TemDataHandler.setUserLoggedCredentialsModel(userLoggedCredentials);
+            isUserInList(TemDataHandler.getUserLoggedCredentialsModel().getCurrentUserUDI());
+        }
+    }
+
     private void LoginUser(String username, String password)
     {
         auth.signInWithEmailAndPassword(username,password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
             @Override
             public void onSuccess(AuthResult authResult) {
                 Toast.makeText(MainActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MainActivity.this, CreateNewPet.class);
-                startActivity(intent);
-                intent.setFlags(intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                userLoggedCredentials.setCurrentUserUDI(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                TemDataHandler.setUserLoggedCredentialsModel(userLoggedCredentials);
+                isUserInList(TemDataHandler.getUserLoggedCredentialsModel().getCurrentUserUDI());
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -119,6 +144,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadComponents()
     {
+        createPetActivity = new Intent(MainActivity.this, CreateNewPet.class);
+        dashboardActivity = new Intent(MainActivity.this, Dashboard.class);
         auth =  FirebaseAuth.getInstance();
         LoginButton = findViewById(R.id.loginButton);
         usernameTxt = findViewById(R.id.emialEdt);
@@ -127,6 +154,28 @@ public class MainActivity extends AppCompatActivity {
         googleSignIn = findViewById(R.id.signInWithGoogleBtn);
         emailSignIn = findViewById(R.id.signInWithEmailBtn);
 
+        userLoggedCredentials = new CredentialsModel();
+
+    }
+    private void isUserInList(String UserID)
+    {
+        FirebaseFirestore.getInstance().collection("Users").whereEqualTo(FieldPath.documentId(),UserID)
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if(task.isSuccessful())
+                {
+                    startActivity(dashboardActivity);
+                    dashboardActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                }
+                else
+                {
+                    startActivity(createPetActivity);
+                    createPetActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                }
+
+            }
+        });
     }
     private void hideSystemUI() {
         View decorView = getWindow().getDecorView();
@@ -138,5 +187,4 @@ public class MainActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
-
 }
