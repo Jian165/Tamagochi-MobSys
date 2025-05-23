@@ -10,5 +10,8 @@
     <string name="MONEY">Money</string>
     <string name="PET_GENDER">PetGender</string>
     <string name="PET_NAME">PetName</string>
+    <string name="USERS">Users</string>
+    <string name="PETS">Pets</string>
+    <string name="PET_OWNED">PetOwned</string>
     <string name="POOP">Poop</string>string>
 </resources>

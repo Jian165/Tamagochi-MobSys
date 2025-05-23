@@ -81,12 +81,12 @@ public class CreateNewPet extends AppCompatActivity {
     private void CreatePet(String parentName,String petName,String petType)
     {
         FirebaseFirestore db =  FirebaseFirestore.getInstance();
-        String PetID = db.collection("Pets").document().getId();
+        String PetID = db.collection(getString(R.string.PETS)).document().getId();
         Map<String,Object> PetOwnerInfo = new HashMap<>();
-        PetOwnerInfo.put("PetOwned",PetID);
-        PetOwnerInfo.put("NameAsParent",parentName);
+        PetOwnerInfo.put(getString(R.string.PET_OWNED),PetID);
+        PetOwnerInfo.put(getString(R.string.NAME_AS_PARENT),parentName);
 
-        db.collection("Users").document(TemDataHandler.getUserLoggedCredentialsModel().getCurrentUserUDI()).set(PetOwnerInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+        db.collection(getString(R.string.USERS)).document(CredentialsModel.getCurrentUserUDI()).set(PetOwnerInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 Toast.makeText(CreateNewPet.this, "Welcome", Toast.LENGTH_SHORT).show();
@@ -94,19 +94,22 @@ public class CreateNewPet extends AppCompatActivity {
         });
 
         Map<String,Object> PetInfo = new HashMap<>();
-        PetInfo.put("PetName",petName);
-        PetInfo.put("PetType",petType);
-        PetInfo.put("IsAlive",true);
-        PetInfo.put("LastFed", Timestamp.now());
-        PetInfo.put("Health",80);
-        PetInfo.put("Happiness",80);
-        PetInfo.put("Money",2);
-        PetInfo.put("Poop",5);
+        PetInfo.put(getString(R.string.PET_NAME),petName);
+        PetInfo.put(getString(R.string.PET_GENDER),petType);
+        PetInfo.put(getString(R.string.IS_ALIVE),true);
+        PetInfo.put(getString(R.string.LAST_FED), Timestamp.now());
+        PetInfo.put(getString(R.string.HEALTH),80);
+        PetInfo.put(getString(R.string.HAPPINESS),80);
+        PetInfo.put(getString(R.string.MONEY),2);
+        PetInfo.put(getString(R.string.POOP),5);
 
-        db.collection("Pets").document(PetID).set(PetInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+        db.collection(getString(R.string.PETS)).document(PetID).set(PetInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                Toast.makeText(CreateNewPet.this, "Your Pet is Now Created", Toast.LENGTH_SHORT).show();
+                if(task.isSuccessful())
+                {
+                    Toast.makeText(CreateNewPet.this, "Your Pet is Now Created", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

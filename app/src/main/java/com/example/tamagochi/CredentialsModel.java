@@ -1,26 +1,24 @@
 package com.example.tamagochi;
 
 
-import com.google.firebase.auth.FirebaseUser;
-
 public class CredentialsModel {
-    public  String getCurrentUserUDI() {
+    public  static String getCurrentUserUDI() {
         return currentUserUDI;
     }
 
-    public void setCurrentUserUDI(String currentUserUDI) {
-        this.currentUserUDI = currentUserUDI;
+    public static void setCurrentUserUDI(String currentUserUDI) {
+        CredentialsModel.currentUserUDI = currentUserUDI;
     }
 
-    public String getPetDI() {
+    public static String getPetDI() {
         return petDI;
     }
 
-    public void setPetDI(String petDI) {
-        this.petDI = petDI;
+    public static void setPetDI(String petDI) {
+        CredentialsModel.petDI = petDI;
     }
 
-    private String currentUserUDI;
-    private String petDI;
+    private static String currentUserUDI;
+    private static String petDI;
 
 }

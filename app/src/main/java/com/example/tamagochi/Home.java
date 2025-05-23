@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -153,7 +154,7 @@ public class Home extends Fragment {
                     int moneyChance = random.nextInt(4)+1;
                     if(moneyChance == 2)
                     {
-
+                        AddMoney(moneyAdd);
                     }
 
                     PetInfoModel.setMoney(PetInfoModel.getMoney() + moneyAdd);
@@ -166,16 +167,27 @@ public class Home extends Fragment {
 
     private void AddMoney(int AmountToAdd)
     {
-        DocumentReference  docPetRef = FirebaseFirestore.getInstance().collection("Pets").document(CredentialsModel.getPetDI());
+        DocumentReference  docPetRef = FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
         docPetRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful())
                 {
                     DocumentSnapshot doc =  task.getResult();
+                    if(doc.exists())
+                    {
+                        int money = (doc.getLong(getString(R.string.MONEY)) != null)? doc.getLong(getString(R.string.MONEY)).intValue():0;
+                        updateMoney(money + AmountToAdd);
+                    }
                 }
             }
         });
+    }
+
+    private void updateMoney(int newMoney)
+    {
+        DocumentReference ref = FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+        ref.update(getString(R.string.MONEY),newMoney);
     }
 
 
@@ -466,7 +478,7 @@ public class Home extends Fragment {
     }
     private void Setup()
     {
-        DocumentReference  docPetRef = FirebaseFirestore.getInstance().collection("Pets").document(CredentialsModel.getPetDI());
+        DocumentReference docPetRef = FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
         docPetRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -476,23 +488,26 @@ public class Home extends Fragment {
 
                     if(doc.exists())
                     {
-                        String parentName =  doc.getString(getString(R.string.NAME_AS_PARENT));
                         String petType = doc.getString(getString(R.string.PET_GENDER));
+                        PetInfoModel.setPetType(petType);
                         String petName = doc.getString(getString(R.string.PET_NAME));
-                        boolean status =  (doc.getBoolean(getString(R.string.IS_ALIVE)) !=null) ? doc.getBoolean("IsAlive").booleanValue():false;
+                        PetInfoModel.setPetName(petName);
+                        boolean status =  (doc.getBoolean(getString(R.string.IS_ALIVE)) !=null) ? doc.getBoolean(getString(R.string.IS_ALIVE)).booleanValue():false;
+                        PetInfoModel.setIsAlive(status);
                         int money  =  (doc.getLong(getString(R.string.MONEY)) !=null)? doc.getLong(getString(R.string.MONEY)).intValue():0;
+                        PetInfoModel.setMoney(money);
                         int health = (doc.get(getString(R.string.HEALTH)) != null)? doc.getLong(getString(R.string.HEALTH)).intValue():0;
+                        PetInfoModel.setHealth(health);
                         int happiness = (doc.get(getString(R.string.HAPPINESS)) != null)? doc.getLong(getString(R.string.HAPPINESS)).intValue():0;
-                        petInfoModel = new PetInfoModel(parentName,petName,petType,money,health,happiness,status);
+                        PetInfoModel.setHappy(happiness);
 
-                        TemDataHandler.setUserLoggedPetInfoModel(petInfoModel);
 
                         CheckCharacter();
                         CheckHealth();
                         UpdateShitImages();
                         SetFoodStorage();
-                        healthProg.setProgress(TemDataHandler.getUserLoggedPetInfoModel().getHealth());
-                        happinessProg.setProgress(TemDataHandler.getUserLoggedPetInfoModel().getHealth());
+                        healthProg.setProgress(PetInfoModel.getHealth());
+                        happinessProg.setProgress(PetInfoModel.getHealth());
                         StartCleanDecay();
                         StartHappyDecay();
                         StartHealthDecay();
@@ -502,6 +517,26 @@ public class Home extends Fragment {
         });
 
     }
+    private void SetupPet()
+    {
+        DocumentReference docUserRef = FirebaseFirestore.getInstance().collection(getString(R.string.USERS)).document(CredentialsModel.getCurrentUserUDI());
+        docUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful())
+                {
+                    DocumentSnapshot doc = task.getResult();
+                    if(doc.exists())
+                    {
+                        CredentialsModel.setPetDI(doc.getString(getString(R.string.PET_OWNED)));
+                        PetInfoModel.setParentName(doc.getString(getString(R.string.NAME_AS_PARENT)));
+                        Setup();
+                    }
+                }
+            }
+        });
+    }
+
 
     private boolean IsAllShitSpawed(Set<Integer> shitkeys)
     {
@@ -633,26 +668,6 @@ public class Home extends Fragment {
         handler.post(ballGameLoop);
     }
 
-
-    private void SetupPet()
-    {
-        DocumentReference docUserRef = FirebaseFirestore.getInstance().collection("Users").document(CredentialsModel.getCurrentUserUDI());
-        docUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if(task.isSuccessful())
-                {
-                    DocumentSnapshot doc = task.getResult();
-                    if(doc.exists())
-                    {
-                        CredentialsModel.setPetDI(doc.getString("PetOwned"));
-                        PetInfoModel.setParentName(doc.getString("NameAsParent"));
-                        Setup();
-                    }
-                }
-            }
-        });
-    }
 
     private void BallGameOver()
     {

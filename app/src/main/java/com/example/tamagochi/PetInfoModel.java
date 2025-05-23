@@ -3,84 +3,74 @@ package com.example.tamagochi;
 import java.util.HashMap;
 
 public class PetInfoModel {
-    public PetInfoModel(String parentName, String petName, String petType, int money, int health, int happy, boolean isAlive) {
-        this.parentName = parentName;
-        this.petName = petName;
-        this.petType = petType;
-        this.money = money;
-        this.health = health;
-        this.happy = happy;
-        this.isAlive = isAlive;
-    }
-
-    private String parentName;
-    private  String petName;
-    private  String petType ;
-    private  int money;
-    private  int health;
-    private  int happy;
-    private  int clean;
-    private  boolean isAlive;
+    private static String parentName;
+    private static String petName;
+    private static String petType ;
+    private static  int money;
+    private static int health;
+    private static int happy;
+    private static int clean;
+    private static boolean isAlive;
 
     public static HashMap<ShopItemModel,Integer> foodStuck = new HashMap<>();
     public static HashMap<Integer,Boolean> shitCollection= new HashMap<>();
 
 
-    public boolean isIsAlive() {
+    public static boolean isIsAlive() {
         return isAlive;
     }
 
-    public void setIsAlive(boolean isAlive) {
-        this.isAlive = isAlive;
+    public static void setIsAlive(boolean isAlive) {
+        PetInfoModel.isAlive = isAlive;
     }
 
 
-    public int getHealth() {
+    public static int getHealth() {
         return health;
     }
 
-    public void setHealth(int health) {
-        this.health = health;
+    public static void setHealth(int health) {
+        PetInfoModel.health = health;
     }
 
-    public int getHappy() {
+    public static int getHappy() {
         return happy;
     }
 
-    public void setHappy(int happy) {
-        this.happy = happy;
+    public static void setHappy(int happy) {
+        PetInfoModel.happy = happy;
     }
 
-    public int getMoney() {
+    public static int getMoney() {
         return money;
     }
 
-    public void setMoney(int money) {
-        this.money = money;
+    public static void setMoney(int money) {
+        PetInfoModel.money = money;
     }
 
-    public String getPetType() {
+    public static String getPetType() {
         return petType;
     }
 
-    public void setPetType(String petType) {
-        this.petType = petType;
+    public static void setPetType(String petType) {
+        PetInfoModel.petType = petType;
     }
 
-    public String getPetName() {
+    public static String getPetName() {
         return petName;
     }
 
-    public void setPetName(String petName) {
-        this.petName = petName;
+    public static void setPetName(String petName) {
+        PetInfoModel.petName = petName;
     }
 
-    public String getParentName() {
+    public static String getParentName() {
         return parentName;
     }
 
-    public void setParentName(String parentName) {
-        this.parentName = parentName;
+    public static void setParentName(String parentName) {
+        PetInfoModel.parentName = parentName;
     }
 
 }

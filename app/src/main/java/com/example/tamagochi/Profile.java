@@ -30,8 +30,8 @@ public class Profile extends Fragment {
         view = inflater.inflate(R.layout.fragment_profile, container, false);
         LoadComponents();
 
-        profilePetName.setText(PetInfoModel.getPetName().toString());
-        parentName.setText(PetInfoModel.getParentName().toString());
+        profilePetName.setText(PetInfoModel.getPetName());
+        parentName.setText(PetInfoModel.getParentName());
         if(PetInfoModel.getPetType().equals("Cat")){
             petProfileImg.setImageResource(R.drawable.idle_1);
         }

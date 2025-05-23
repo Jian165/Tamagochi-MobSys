@@ -43,8 +43,6 @@ public class MainActivity extends AppCompatActivity{
     CheckBox passwordVisibility;
     boolean hasError;
     private FirebaseAuth auth;
-    static boolean isUserHasRecord;
-    private static CredentialsModel userLoggedCredentials;
     Intent createPetActivity, dashboardActivity;
 
     @Override
@@ -100,9 +98,7 @@ public class MainActivity extends AppCompatActivity{
                 }
             }
         });
-
         hideSystemUI();
-
     }
 
     @Override
@@ -111,9 +107,8 @@ public class MainActivity extends AppCompatActivity{
         FirebaseUser user =  FirebaseAuth.getInstance().getCurrentUser();
         if(user != null)
         {
-            userLoggedCredentials.setCurrentUserUDI(FirebaseAuth.getInstance().getCurrentUser().getUid());
-            TemDataHandler.setUserLoggedCredentialsModel(userLoggedCredentials);
-            isUserInList(TemDataHandler.getUserLoggedCredentialsModel().getCurrentUserUDI());
+            CredentialsModel.setCurrentUserUDI(FirebaseAuth.getInstance().getCurrentUser().getUid());
+            isUserInList(CredentialsModel.getCurrentUserUDI());
         }
     }
 
@@ -123,9 +118,8 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onSuccess(AuthResult authResult) {
                 Toast.makeText(MainActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
-                userLoggedCredentials.setCurrentUserUDI(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                TemDataHandler.setUserLoggedCredentialsModel(userLoggedCredentials);
-                isUserInList(TemDataHandler.getUserLoggedCredentialsModel().getCurrentUserUDI());
+                CredentialsModel.setCurrentUserUDI(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                isUserInList(CredentialsModel.getCurrentUserUDI());
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -153,13 +147,10 @@ public class MainActivity extends AppCompatActivity{
         passwordVisibility = findViewById(R.id.cbPasswordVisibility);
         googleSignIn = findViewById(R.id.signInWithGoogleBtn);
         emailSignIn = findViewById(R.id.signInWithEmailBtn);
-
-        userLoggedCredentials = new CredentialsModel();
-
     }
     private void isUserInList(String UserID)
     {
-        FirebaseFirestore.getInstance().collection("Users").whereEqualTo(FieldPath.documentId(),UserID)
+        FirebaseFirestore.getInstance().collection(getString(R.string.USERS)).whereEqualTo(FieldPath.documentId(),UserID)
                 .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
