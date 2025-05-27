@@ -12,10 +12,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class BuyFood extends AppCompatActivity {
 
@@ -90,10 +103,10 @@ public class BuyFood extends AppCompatActivity {
                    foodQuantity.setError("Enter Quantity");
                 }
                 if(PetInfoModel.getMoney()>=totalPrice && hasQuantity){
-                    Toast.makeText(BuyFood.this, "Successfully Purchase:"+foodName, Toast.LENGTH_SHORT).show();
-                    MakePayment(currentMoney,totalPrice);
-                    AddFoodStorage(shopItem,quantity);
+                    Toast.makeText(BuyFood.this, "Successfully Purchase: "+foodName, Toast.LENGTH_SHORT).show();
+                    StoreFoodPurhcased(shopItem,quantity);
                     Intent backToDashboard = new Intent(BuyFood.this,Dashboard.class);
+                    MakePayment();
                     startActivity(backToDashboard);
                     finish();
                 }
@@ -106,25 +119,89 @@ public class BuyFood extends AppCompatActivity {
         });
     }
 
-    private void AddFoodStorage(ShopItemModel itemToStore, int quantity){
-        if(PetInfoModel.foodStuck.containsKey(itemToStore))
-        {
-            int currentItemQuantity = PetInfoModel.foodStuck.get(itemToStore);
-            PetInfoModel.foodStuck.put(itemToStore,currentItemQuantity+quantity);
-        }
-        else
-        {
-            PetInfoModel.foodStuck.put(itemToStore,quantity);
-        }
+    private void MakePayment()
+    {
+        DocumentReference docRef = FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful())
+                {
+                    DocumentSnapshot doc = task.getResult();
+                    if(doc.exists())
+                    {
+                        int money = (doc.getLong(getString(R.string.MONEY)) != null)? doc.getLong(getString(R.string.MONEY)).intValue():0;
+                        ProcessPyament(money,CalculateTotalPrice(quantity,foodPrice));
+                    }
+                }
+            }
+        });
     }
+
+    private void StoreFoodPurhcased(ShopItemModel itemToStore, int quantity){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef =  db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful())
+                {
+                    DocumentSnapshot doc = task.getResult();
+                    if(doc.exists())
+                    {
+                        Map<String, Object> foodItems = (Map<String, Object>) doc.get(getString(R.string.FOOD_STORAGE));
+                        if(foodItems != null && foodItems.containsKey(itemToStore.getItemName()))
+                        {
+                            UpdateItemQuantity(itemToStore.getItemName(),quantity,docRef);
+                        }
+                        else
+                        {
+                            AddItemToList(itemToStore.getItemName(),quantity,docRef);
+                        }
+                    }
+                }
+
+            }
+        });
+    }
+    private void AddItemToList(String itemName,int itemQuantity,DocumentReference docRef)
+    {
+        Map<String,Object> foodItem = new HashMap<>();
+        foodItem.put(itemName,itemQuantity);
+
+        Map<String,Object> foodItemFiled = new HashMap<>();
+        foodItemFiled.put(getString(R.string.FOOD_STORAGE),foodItem);
+
+        docRef.set(foodItemFiled, SetOptions.merge()).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                System.out.println("BuyFood: add new food successfully");
+            }
+        });
+    }
+
+    private void UpdateItemQuantity(String foodName, int quantityToAdd, DocumentReference docRef)
+    {
+        String fieldPath = getString(R.string.FOOD_STORAGE)+"."+foodName;
+        docRef.update(fieldPath, FieldValue.increment(quantityToAdd)).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                System.out.println("BuyFood: add food quantity successfully");
+            }
+        });
+    }
+
+
     private int CalculateTotalPrice(int itemPrice, int itemQuantity)
     {
         return itemPrice * itemQuantity;
     }
 
-    private void MakePayment(int currentMoney, int totalPrice)
+    private void ProcessPyament(int currentMoney, int totalPrice)
     {
-        PetInfoModel.setMoney(currentMoney-totalPrice);
+        int deductedMoney = currentMoney-totalPrice;
+        DocumentReference docRef = FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+        docRef.update(getString(R.string.MONEY),deductedMoney);
     }
 
     private void LoadComponents()

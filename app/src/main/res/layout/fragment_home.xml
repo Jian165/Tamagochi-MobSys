@@ -99,6 +99,42 @@
             android:layout_toEndOf="@+id/happyImg"
             />
 
+
+        <TextView
+            android:id="@+id/LblMoney"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textSize="16dp"
+            android:text="0"
+            android:background="@drawable/bg_yellow_round_rec"
+            android:textColor="@color/orage_314"
+            android:fontFamily="@font/chewy_regular"
+            android:letterSpacing="0.1"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:layout_below="@+id/healthImg"
+            android:layout_marginTop="-40dp"
+            android:layout_alignLeft="@+id/healthImg"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
+            />
+
+        <ImageView
+            android:id="@+id/coinImg"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_coin"
+            android:layout_marginTop="4dp"
+            android:layout_below="@+id/LblMoney"
+            android:layout_alignLeft="@id/LblMoney"
+            android:layout_alignRight="@id/LblMoney"
+            />
+
+
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

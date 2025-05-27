@@ -93,6 +93,9 @@ public class CreateNewPet extends AppCompatActivity {
             }
         });
 
+        Map<String,Object> FoodStorage = new HashMap<>();
+        Map<String,Object> PoopStorage = new HashMap<>();
+
         Map<String,Object> PetInfo = new HashMap<>();
         PetInfo.put(getString(R.string.PET_NAME),petName);
         PetInfo.put(getString(R.string.PET_GENDER),petType);
@@ -101,7 +104,8 @@ public class CreateNewPet extends AppCompatActivity {
         PetInfo.put(getString(R.string.HEALTH),80);
         PetInfo.put(getString(R.string.HAPPINESS),80);
         PetInfo.put(getString(R.string.MONEY),2);
-        PetInfo.put(getString(R.string.POOP),5);
+        PetInfo.put(getString(R.string.POOP),PoopStorage);
+        PetInfo.put(getString(R.string.FOOD_STORAGE),FoodStorage);
 
         db.collection(getString(R.string.PETS)).document(PetID).set(PetInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

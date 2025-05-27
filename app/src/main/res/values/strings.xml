@@ -12,6 +12,15 @@
     <string name="PET_NAME">PetName</string>
     <string name="USERS">Users</string>
     <string name="PETS">Pets</string>
+    <string name="FOOD_ITEM">FoodItem</string>
     <string name="PET_OWNED">PetOwned</string>
     <string name="POOP">Poop</string>string>
+    <string name="FOOD_STORAGE">FoodStorage</string>
+
+    <string name="FOOD_NAME">FoodName</string>
+    <string name="FOOD_IMAGE">FoodImage</string>
+    <string name="FOOD_PRICE">FoodPrice</string>
+    <string name="FOOD_HEALTH">FoodHealth</string>
+    <string name="FOOD_HAPPINESS">FoodHappiness</string>
+
 </resources>

@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity{
                 .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.isSuccessful())
+                if(task.isSuccessful() && !task.getResult().isEmpty())
                 {
                     startActivity(dashboardActivity);
                     dashboardActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

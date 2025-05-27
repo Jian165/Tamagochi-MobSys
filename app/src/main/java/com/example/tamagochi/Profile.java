@@ -19,7 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class Profile extends Fragment {
     TextView profilePetName,parentName;
-    static TextView currentMoney;
+    private static TextView currentMoney;
     ImageView petProfileImg;
     Button BtnLogout;
 

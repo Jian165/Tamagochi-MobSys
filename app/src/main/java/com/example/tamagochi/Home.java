@@ -5,10 +5,10 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
-import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -24,13 +24,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
-
-import javax.xml.transform.sax.TemplatesHandler;
 
 public class Home extends Fragment {
 
@@ -39,7 +39,7 @@ public class Home extends Fragment {
     private ImageView feedImg;
     private ProgressBar healthProg, happinessProg;
     private FrameLayout playBallArea;
-    private TextView quantity;
+    private TextView quantity, moneyValue;
     private static final int animationFrames = 60;
 
     private float velocity = 0, gravity = 0.7f, jumpStrangth = -16f;
@@ -53,7 +53,7 @@ public class Home extends Fragment {
 
     private Random random;
 
-    MediaPlayer mediaPlayer;
+    private MediaPlayer mediaPlayer, coinMediaPlayer;
     private PetInfoModel petInfoModel;
     private CredentialsModel credentialsModel;
 
@@ -156,9 +156,6 @@ public class Home extends Fragment {
                     {
                         AddMoney(moneyAdd);
                     }
-
-                    PetInfoModel.setMoney(PetInfoModel.getMoney() + moneyAdd);
-                    Profile.updateCurrentMoney();
                 }
                 return true;
             }
@@ -188,6 +185,34 @@ public class Home extends Fragment {
     {
         DocumentReference ref = FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
         ref.update(getString(R.string.MONEY),newMoney);
+    }
+
+    private void MoneyRealTimeListiner()
+    {
+        FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI()).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+
+                if(value != null && value.exists())
+                {
+                    int money = (value.getLong(getString(R.string.MONEY)) != null)? value.getLong(getString(R.string.MONEY)).intValue():PetInfoModel.getMoney();
+                    PetInfoModel.setMoney(money);
+                    CheckMoney();
+
+                    if((!coinMediaPlayer.isPlaying() && coinMediaPlayer != null) && isPlayBallIn)
+                    {
+                        coinMediaPlayer.start();
+                        coinMediaPlayer.setVolume(0.3f,0.3f);
+                    }
+                }
+            }
+        });
+    }
+
+    private void CheckMoney()
+    {
+        moneyValue.setText(""+PetInfoModel.getMoney());
+        Profile.updateCurrentMoney();
     }
 
 
@@ -424,6 +449,7 @@ public class Home extends Fragment {
         happyImg = view.findViewById(R.id.happyImg);
         backBtn = view.findViewById(R.id.btnBack);
         nextBtn = view.findViewById(R.id.btnNext);
+        moneyValue = view.findViewById(R.id.LblMoney);
 
         shitArrayList = new ArrayList<>();
         shitArrayList.add(shit1Img);
@@ -433,6 +459,7 @@ public class Home extends Fragment {
         shitArrayList.add(shit5Img);
 
         mediaPlayer = MediaPlayer.create(getContext(), R.raw.ballhit);
+        coinMediaPlayer = MediaPlayer.create(getContext(),R.raw.coin);
 
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -511,6 +538,8 @@ public class Home extends Fragment {
                         StartCleanDecay();
                         StartHappyDecay();
                         StartHealthDecay();
+                        CheckMoney();
+                        MoneyRealTimeListiner();
                     }
                 }
             }
