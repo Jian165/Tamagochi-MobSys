@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.view.menu.ShowableListMenu;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
@@ -21,14 +22,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -170,24 +174,14 @@ public class Home extends Fragment {
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful())
                 {
-                    DocumentSnapshot doc =  task.getResult();
-                    if(doc.exists())
-                    {
-                        int money = (doc.getLong(getString(R.string.MONEY)) != null)? doc.getLong(getString(R.string.MONEY)).intValue():0;
-                        updateMoney(money + AmountToAdd);
-                    }
+                    docPetRef.update(getString(R.string.MONEY), FieldValue.increment(AmountToAdd));
                 }
             }
         });
     }
 
-    private void updateMoney(int newMoney)
-    {
-        DocumentReference ref = FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
-        ref.update(getString(R.string.MONEY),newMoney);
-    }
 
-    private void MoneyRealTimeListiner()
+    private void MoneyRealTimeListener()
     {
         FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI()).addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
@@ -197,7 +191,7 @@ public class Home extends Fragment {
                 {
                     int money = (value.getLong(getString(R.string.MONEY)) != null)? value.getLong(getString(R.string.MONEY)).intValue():PetInfoModel.getMoney();
                     PetInfoModel.setMoney(money);
-                    CheckMoney();
+                    UpdateMoney();
 
                     if((!coinMediaPlayer.isPlaying() && coinMediaPlayer != null) && isPlayBallIn)
                     {
@@ -209,7 +203,7 @@ public class Home extends Fragment {
         });
     }
 
-    private void CheckMoney()
+    private void UpdateMoney()
     {
         moneyValue.setText(""+PetInfoModel.getMoney());
         Profile.updateCurrentMoney();
@@ -272,7 +266,8 @@ public class Home extends Fragment {
         };
     }
 
-    public void SetFoodStorage() {
+    private void SetFoodStorage() {
+        System.out.println("FoodUIRefreshed");
         if (PetInfoModel.foodStuck.size() <=0) {
             feedImg.setImageResource(R.drawable.feed);
             quantity.setVisibility(View.INVISIBLE);
@@ -281,7 +276,6 @@ public class Home extends Fragment {
         } else {
             Set<ShopItemModel> foodKeys = PetInfoModel.foodStuck.keySet();
             foodInStorage.addAll(foodKeys);
-            System.out.println(foodItemIndexSelected);
             feedImg.setImageResource(foodInStorage.get(foodItemIndexSelected).getItemImage());
             quantity.setVisibility(View.VISIBLE);
             int numQuantity = PetInfoModel.foodStuck.get(foodInStorage.get(foodItemIndexSelected));
@@ -291,6 +285,45 @@ public class Home extends Fragment {
         }
     }
 
+
+    private void LoadItemsFromFirebase()
+    {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if(documentSnapshot.exists())
+                {
+                    Map<String,Object> foodStorage = (Map<String, Object>) documentSnapshot.get(getString(R.string.FOOD_STORAGE));
+                    if(foodStorage != null)
+                    {
+                        for(Map.Entry<String,Object> foodStored : foodStorage.entrySet())
+                        {
+                            Map<String,Object> foodData = (Map<String,Object>) foodStored.getValue();
+
+                            int quantity = ((Long) foodData.get(getString(R.string.FOOD_QUANTITY))).intValue();
+                            Map <String,Object> stats = (Map<String,Object>) foodData.get(getString(R.string.FOOD_ITEM_STATS));
+
+                            if(stats != null)
+                            {
+                                int foodHealthStat = ((Long) stats.get(getString(R.string.FOOD_HEALTH))).intValue();
+                                int foodImageStat = ((Long) stats.get(getString(R.string.FOOD_IMAGE))).intValue();
+                                int foodHappyStat = ((Long) stats.get(getString(R.string.FOOD_HAPPINESS))).intValue();
+
+                                ShopItemModel foodItemStats = new ShopItemModel(foodImageStat,foodHealthStat,foodHappyStat);
+                                PetInfoModel.foodStuck.put(foodItemStats,quantity);
+                            }
+
+                            SetFoodStorage();
+                        }
+                    }
+
+                }
+
+            }
+        });
+    }
     private void CheckCharacter() {
         if (PetInfoModel.getPetType().equals("Cat")) {
             charachterIdleImages = catIdleImages;
@@ -528,24 +561,24 @@ public class Home extends Fragment {
                         int happiness = (doc.get(getString(R.string.HAPPINESS)) != null)? doc.getLong(getString(R.string.HAPPINESS)).intValue():0;
                         PetInfoModel.setHappy(happiness);
 
-
                         CheckCharacter();
                         CheckHealth();
                         UpdateShitImages();
-                        SetFoodStorage();
+                        LoadItemsFromFirebase();
                         healthProg.setProgress(PetInfoModel.getHealth());
                         happinessProg.setProgress(PetInfoModel.getHealth());
                         StartCleanDecay();
                         StartHappyDecay();
                         StartHealthDecay();
-                        CheckMoney();
-                        MoneyRealTimeListiner();
+                        UpdateMoney();
+                        MoneyRealTimeListener();
                     }
                 }
             }
         });
 
     }
+
     private void SetupPet()
     {
         DocumentReference docUserRef = FirebaseFirestore.getInstance().collection(getString(R.string.USERS)).document(CredentialsModel.getCurrentUserUDI());

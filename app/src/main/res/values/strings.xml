@@ -16,6 +16,8 @@
     <string name="PET_OWNED">PetOwned</string>
     <string name="POOP">Poop</string>string>
     <string name="FOOD_STORAGE">FoodStorage</string>
+    <string name="FOOD_ITEM_STATS">FoodItemStats</string>
+    <string name="FOOD_QUANTITY">FoodQuantity</string>
 
     <string name="FOOD_NAME">FoodName</string>
     <string name="FOOD_IMAGE">FoodImage</string>

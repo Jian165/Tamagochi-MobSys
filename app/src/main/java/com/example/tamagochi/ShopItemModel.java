@@ -37,4 +37,9 @@ public class ShopItemModel {
         this.happyStat = happyStat;
         this.itemName = itemName;
     }
+    public ShopItemModel(int itemImage, int healthStat, int happyStat) {
+        this.itemImage = itemImage;
+        this.healthStat = healthStat;
+        this.happyStat = happyStat;
+    }
 }

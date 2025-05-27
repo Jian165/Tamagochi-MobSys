@@ -1,6 +1,7 @@
 package com.example.tamagochi;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class PetInfoModel {
     private static String parentName;

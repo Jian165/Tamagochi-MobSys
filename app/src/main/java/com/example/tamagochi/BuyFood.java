@@ -106,7 +106,7 @@ public class BuyFood extends AppCompatActivity {
                     Toast.makeText(BuyFood.this, "Successfully Purchase: "+foodName, Toast.LENGTH_SHORT).show();
                     StoreFoodPurhcased(shopItem,quantity);
                     Intent backToDashboard = new Intent(BuyFood.this,Dashboard.class);
-                    MakePayment();
+                    MakePayment(totalPrice);
                     startActivity(backToDashboard);
                     finish();
                 }
@@ -119,7 +119,7 @@ public class BuyFood extends AppCompatActivity {
         });
     }
 
-    private void MakePayment()
+    private void MakePayment(int totalPrice)
     {
         DocumentReference docRef = FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -130,8 +130,7 @@ public class BuyFood extends AppCompatActivity {
                     DocumentSnapshot doc = task.getResult();
                     if(doc.exists())
                     {
-                        int money = (doc.getLong(getString(R.string.MONEY)) != null)? doc.getLong(getString(R.string.MONEY)).intValue():0;
-                        ProcessPyament(money,CalculateTotalPrice(quantity,foodPrice));
+                        docRef.update(getString(R.string.MONEY),FieldValue.increment(-totalPrice));
                     }
                 }
             }
@@ -152,11 +151,11 @@ public class BuyFood extends AppCompatActivity {
                         Map<String, Object> foodItems = (Map<String, Object>) doc.get(getString(R.string.FOOD_STORAGE));
                         if(foodItems != null && foodItems.containsKey(itemToStore.getItemName()))
                         {
-                            UpdateItemQuantity(itemToStore.getItemName(),quantity,docRef);
+                            UpdateItemQuantity(itemToStore,quantity,docRef);
                         }
                         else
                         {
-                            AddItemToList(itemToStore.getItemName(),quantity,docRef);
+                            AddItemToList(itemToStore,quantity,docRef);
                         }
                     }
                 }
@@ -164,10 +163,20 @@ public class BuyFood extends AppCompatActivity {
             }
         });
     }
-    private void AddItemToList(String itemName,int itemQuantity,DocumentReference docRef)
+    private void AddItemToList(ShopItemModel item,int itemQuantity,DocumentReference docRef)
     {
+
+        Map<String,Object> stats = new HashMap<>();
+        stats.put(getString(R.string.FOOD_IMAGE),item.getItemImage());
+        stats.put(getString(R.string.FOOD_HEALTH),item.getHealthStat());
+        stats.put(getString(R.string.FOOD_HAPPINESS),item.getHappyStat());
+
+        Map<String, Object> foodData = new HashMap<>();
+        foodData.put(getString(R.string.FOOD_ITEM_STATS),stats);
+        foodData.put(getString(R.string.FOOD_QUANTITY),itemQuantity);
+
         Map<String,Object> foodItem = new HashMap<>();
-        foodItem.put(itemName,itemQuantity);
+        foodItem.put(item.getItemName(),foodData);
 
         Map<String,Object> foodItemFiled = new HashMap<>();
         foodItemFiled.put(getString(R.string.FOOD_STORAGE),foodItem);
@@ -175,14 +184,13 @@ public class BuyFood extends AppCompatActivity {
         docRef.set(foodItemFiled, SetOptions.merge()).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
-                System.out.println("BuyFood: add new food successfully");
             }
         });
     }
 
-    private void UpdateItemQuantity(String foodName, int quantityToAdd, DocumentReference docRef)
+    private void UpdateItemQuantity(ShopItemModel item, int quantityToAdd, DocumentReference docRef)
     {
-        String fieldPath = getString(R.string.FOOD_STORAGE)+"."+foodName;
+        String fieldPath = getString(R.string.FOOD_STORAGE)+"."+item.getItemName()+"."+getString(R.string.FOOD_QUANTITY);
         docRef.update(fieldPath, FieldValue.increment(quantityToAdd)).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
@@ -197,12 +205,6 @@ public class BuyFood extends AppCompatActivity {
         return itemPrice * itemQuantity;
     }
 
-    private void ProcessPyament(int currentMoney, int totalPrice)
-    {
-        int deductedMoney = currentMoney-totalPrice;
-        DocumentReference docRef = FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
-        docRef.update(getString(R.string.MONEY),deductedMoney);
-    }
 
     private void LoadComponents()
     {
