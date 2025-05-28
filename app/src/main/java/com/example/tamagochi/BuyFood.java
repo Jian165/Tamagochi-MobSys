@@ -104,7 +104,7 @@ public class BuyFood extends AppCompatActivity {
                 }
                 if(PetInfoModel.getMoney()>=totalPrice && hasQuantity){
                     Toast.makeText(BuyFood.this, "Successfully Purchase: "+foodName, Toast.LENGTH_SHORT).show();
-                    StoreFoodPurhcased(shopItem,quantity);
+                    StoreFoodPurchased(shopItem,quantity);
                     Intent backToDashboard = new Intent(BuyFood.this,Dashboard.class);
                     MakePayment(totalPrice);
                     startActivity(backToDashboard);
@@ -137,7 +137,7 @@ public class BuyFood extends AppCompatActivity {
         });
     }
 
-    private void StoreFoodPurhcased(ShopItemModel itemToStore, int quantity){
+    private void StoreFoodPurchased(ShopItemModel itemToStore, int quantity){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference docRef =  db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {

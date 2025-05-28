@@ -6,7 +6,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.view.menu.ShowableListMenu;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
@@ -32,9 +31,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class Home extends Fragment {
 
@@ -51,8 +52,11 @@ public class Home extends Fragment {
     private boolean isPlayBallIn = false;
     private Runnable petIdle,petDied, ballGameLoop, healthDecey,happyDecay, cleanlinessDecay;
     private ArrayList<Integer> charachterIdleImages, characterDeadImages, catIdleImages, catDeadImages, dogIdleImages, dogDeadImages;
+
     private ArrayList<ImageView> shitArrayList;
-    private ArrayList<ShopItemModel> foodInStorage;
+    private Map<String,ShopItemModel> foodInStorageStats;
+    private Map<String,Integer> foodInStorageQuantity;
+    private ArrayList<String> foodInStorageName;
     private int foodItemIndexSelected = 0, healthStatInc = 0, happyStatcInc = 0, idleImgIndex = 0, deadImgIndex = 0, eatingImg;
 
     private Random random;
@@ -62,7 +66,10 @@ public class Home extends Fragment {
     private CredentialsModel credentialsModel;
 
     private Handler handler = new Handler();
-    int currentMoney;
+    private ScheduledExecutorService healthDecayScheduler;
+    private ScheduledExecutorService happyDecayScheduler;
+    private ScheduledExecutorService cleanlinessDecayScheduler;
+
 
 
     @Override
@@ -226,23 +233,14 @@ public class Home extends Fragment {
                         break;
                     case DragEvent.ACTION_DRAG_EXITED:
                         if (view.getId() == R.id.imgFeed) {
-                            CheckHealth();
                         }
                         break;
                     case DragEvent.ACTION_DROP:
                         if (view.getId() == R.id.imgFeed) {
                             HealthUpdate(healthStatInc);
                             HappinessUpdate(happyStatcInc);
-                            if (!PetInfoModel.foodStuck.isEmpty()) {
-                                PetInfoModel.foodStuck.put(foodInStorage.get(foodItemIndexSelected), PetInfoModel.foodStuck.get(foodInStorage.get(foodItemIndexSelected)) - 1);
-                                if (PetInfoModel.foodStuck.get(foodInStorage.get(foodItemIndexSelected)) <= 0) {
-                                    PetInfoModel.foodStuck.remove(foodInStorage.get(foodItemIndexSelected));
-                                    foodInStorage.remove(foodItemIndexSelected);
-                                    foodItemIndexSelected=PetInfoModel.foodStuck.size()-1;
-                                }
-                                SetFoodStorage();
-                            }
-                            CheckHealth();
+                            ReduceFoodStock();
+                            SetFoodStorage();
                         }
                         if (view.getId() == R.id.imgPlay) {
                             if (!isPlayBallIn) {
@@ -265,29 +263,90 @@ public class Home extends Fragment {
             }
         };
     }
+    private void QuantityListener()
+    {
+
+        FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI()).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                if(value.exists() && value != null)
+                {
+                    Map<String,Object> foodStored = (Map<String,Object>) value.get(getString(R.string.FOOD_STORAGE));
+                    if(foodStored != null && !foodInStorageName.isEmpty())
+                    {
+                        String itemSelected = foodInStorageName.get(foodItemIndexSelected);
+                        Map<String,Object> foodData = (Map<String,Object>) foodStored.get(itemSelected);
+                        if(foodData != null)
+                        {
+                            int quantity = ((Long) foodData.get(getString(R.string.FOOD_QUANTITY))).intValue();
+                            foodInStorageQuantity.replace(foodInStorageName.get(foodItemIndexSelected),quantity);
+
+                            if(quantity == 0)
+                            {
+                                RemoveItemFromDatabase(itemSelected);
+                            }
+                        }
+                    }
+                    SetFoodStorage();
+                }
+            }
+        });
+    }
+
+    private void RemoveItemFromDatabase(String foodToRemove)
+    {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Map<String,Object> itemToRemove = new HashMap<>();
+        itemToRemove.put(getString(R.string.FOOD_STORAGE)+"."+foodToRemove,FieldValue.delete());
+        db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI()).update(itemToRemove).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                System.out.println(foodToRemove + " Ran out of stock");
+                foodInStorageQuantity.remove(foodToRemove);
+                foodInStorageStats.remove(foodToRemove);
+                foodInStorageName.remove(foodToRemove);
+                SetFoodStorage();
+            }
+        });
+
+    }
 
     private void SetFoodStorage() {
-        System.out.println("FoodUIRefreshed");
-        if (PetInfoModel.foodStuck.size() <=0) {
+        if (foodInStorageName.isEmpty() && foodInStorageQuantity.isEmpty()) {
             feedImg.setImageResource(R.drawable.feed);
             quantity.setVisibility(View.INVISIBLE);
             healthStatInc = 0;
             happyStatcInc = 0;
         } else {
-            Set<ShopItemModel> foodKeys = PetInfoModel.foodStuck.keySet();
-            foodInStorage.addAll(foodKeys);
-            feedImg.setImageResource(foodInStorage.get(foodItemIndexSelected).getItemImage());
+            String foodNameSelected =  foodInStorageName.get(foodItemIndexSelected);
+            feedImg.setImageResource(foodInStorageStats.get(foodNameSelected).getItemImage());
             quantity.setVisibility(View.VISIBLE);
-            int numQuantity = PetInfoModel.foodStuck.get(foodInStorage.get(foodItemIndexSelected));
+            int numQuantity = foodInStorageQuantity.get(foodNameSelected);
             quantity.setText(""+numQuantity);
-            healthStatInc = foodInStorage.get(foodItemIndexSelected).getHealthStat();
-            happyStatcInc = foodInStorage.get(foodItemIndexSelected).getHappyStat();
+            healthStatInc = foodInStorageStats.get(foodNameSelected).getHealthStat();
+            happyStatcInc = foodInStorageStats.get(foodNameSelected).getHappyStat();
         }
     }
+
+    private void ReduceFoodStock()
+    {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+        String fieldPath = getString(R.string.FOOD_STORAGE)+"."+foodInStorageName.get(foodItemIndexSelected)+"."+getString(R.string.FOOD_QUANTITY);
+        docRef.update(fieldPath,FieldValue.increment(-1)).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+            }
+        });
+    }
+
 
 
     private void LoadItemsFromFirebase()
     {
+        foodInStorageStats = new HashMap<>();
+        foodInStorageQuantity =new HashMap<>();
+        foodInStorageName = new ArrayList<>();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference docRef = db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
         docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -300,27 +359,29 @@ public class Home extends Fragment {
                     {
                         for(Map.Entry<String,Object> foodStored : foodStorage.entrySet())
                         {
+                            String foodName = foodStored.getKey();
                             Map<String,Object> foodData = (Map<String,Object>) foodStored.getValue();
 
                             int quantity = ((Long) foodData.get(getString(R.string.FOOD_QUANTITY))).intValue();
                             Map <String,Object> stats = (Map<String,Object>) foodData.get(getString(R.string.FOOD_ITEM_STATS));
-
+                            int foodHealthStat = 0;
+                            int foodImageStat = 0;
+                            int foodHappyStat = 0;
                             if(stats != null)
                             {
-                                int foodHealthStat = ((Long) stats.get(getString(R.string.FOOD_HEALTH))).intValue();
-                                int foodImageStat = ((Long) stats.get(getString(R.string.FOOD_IMAGE))).intValue();
-                                int foodHappyStat = ((Long) stats.get(getString(R.string.FOOD_HAPPINESS))).intValue();
-
-                                ShopItemModel foodItemStats = new ShopItemModel(foodImageStat,foodHealthStat,foodHappyStat);
-                                PetInfoModel.foodStuck.put(foodItemStats,quantity);
+                                foodHealthStat = ((Long) stats.get(getString(R.string.FOOD_HEALTH))).intValue();
+                                foodImageStat = ((Long) stats.get(getString(R.string.FOOD_IMAGE))).intValue();
+                                foodHappyStat = ((Long) stats.get(getString(R.string.FOOD_HAPPINESS))).intValue();
                             }
-
+                            ShopItemModel foodItemStats = new ShopItemModel(foodImageStat,foodHealthStat,foodHappyStat);
+                            foodInStorageName.add(foodName);
+                            foodInStorageStats.put(foodName,foodItemStats);
+                            foodInStorageQuantity.put(foodName,quantity);
                             SetFoodStorage();
                         }
                     }
 
                 }
-
             }
         });
     }
@@ -341,6 +402,106 @@ public class Home extends Fragment {
 
     }
 
+
+    private void HappinessUpdate(int happyLevelToAdd) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef =  db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful() && task.getResult() != null)
+                {
+                    DocumentSnapshot doc =  task.getResult();
+                    int happiness = ((Long)doc.getLong(getString(R.string.HAPPINESS))).intValue();
+                    if (happiness <= 100) {
+                        int result ;
+                        if((happiness + happyLevelToAdd)>0)
+                        {
+                            if((happiness+happyLevelToAdd)>100)
+                            {
+                                result = 100;
+                            }
+                            else
+                            {
+                                result = happiness+ happyLevelToAdd;
+                            }
+                        }
+                        else
+                        {
+                            result = 0;
+                        }
+                        docRef.update(getString(R.string.HAPPINESS),result);
+                    }
+                }
+            }
+        });
+    }
+    private void HappinessLevelListener()
+    {
+        FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI()).addSnapshotListener(
+                new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if(value.exists() && value != null)
+                        {
+                            int happyLevel =((Long) value.getLong(getString(R.string.HAPPINESS))).intValue();
+                            happinessProg.setProgress(happyLevel);
+                        }
+                    }
+                }
+        );
+    }
+
+    private void HealthUpdate(int healthToAdd) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef =  db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful() && task.getResult() != null)
+                {
+                    DocumentSnapshot doc =  task.getResult();
+                    int health = ((Long)doc.getLong(getString(R.string.HEALTH))).intValue();
+                    if (health <= 100) {
+                        int result ;
+                        if((health + healthToAdd)>0)
+                        {
+                            if((health+healthToAdd)>100)
+                            {
+                                result = 100;
+                            }
+                            else
+                            {
+                                result = health+ healthToAdd;
+                            }
+                        }
+                        else
+                        {
+                            result = 0;
+                        }
+                        docRef.update(getString(R.string.HEALTH),result);
+                    }
+                }
+            }
+        });
+    }
+
+    private void HealthLevelListener()
+    {
+        FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI()).addSnapshotListener(
+                new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if(value.exists() && value != null)
+                        {
+                            int healthLevel =((Long) value.getLong(getString(R.string.HEALTH))).intValue();
+                            healthProg.setProgress(healthLevel);
+                            CheckHealth();
+                        }
+                    }
+                }
+        );
+    }
     private void CheckHealth() {
         StopDead();
         StopIdle();
@@ -360,55 +521,6 @@ public class Home extends Fragment {
         }
     }
 
-    private void HappinessUpdate(int happy) {
-        if (PetInfoModel.getHappy() <= 100) {
-            int result ;
-            if((PetInfoModel.getHappy() + happy)>0)
-            {
-                if((PetInfoModel.getHappy()+happy)>100)
-                {
-                    result = 100;
-                }
-                else
-                {
-                    result = PetInfoModel.getHappy() + happy;
-                }
-            }
-            else
-            {
-                result = 0;
-            }
-            PetInfoModel.setHappy(result);
-        }
-        happinessProg.setProgress(PetInfoModel.getHappy());
-    }
-
-    private void HealthUpdate(int health) {
-        if (PetInfoModel.getHealth() <= 100) {
-            int result ;
-            if((PetInfoModel.getHealth() + health)>0)
-            {
-                if((PetInfoModel.getHealth()+health)>100)
-                {
-                    result = 100;
-                }
-                else
-                {
-                    result = PetInfoModel.getHealth() + health;
-                }
-            }
-            else
-            {
-                result = 0;
-            }
-            PetInfoModel.setHealth(result);
-        }
-        healthProg.setProgress(PetInfoModel.getHealth());
-        System.out.println(PetInfoModel.getHealth());
-        System.out.println(healthProg.getProgress());
-
-        CheckHealth();
-    }
 
     private void LoadComponents() {
 
@@ -461,7 +573,6 @@ public class Home extends Fragment {
         dogDeadImages.add(R.drawable.dog_dead10);
 
 
-        foodInStorage = new ArrayList<>();
 
         characterImg = view.findViewById(R.id.imgCharacter);
         feedImg = view.findViewById(R.id.imgFeed);
@@ -497,11 +608,11 @@ public class Home extends Fragment {
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!PetInfoModel.foodStuck.isEmpty()) {
+                if (!foodInStorageName.isEmpty()) {
                     if (foodItemIndexSelected > 0) {
                         foodItemIndexSelected -= 1;
                     } else {
-                        foodItemIndexSelected = PetInfoModel.foodStuck.size() - 1;
+                        foodItemIndexSelected = foodInStorageName.size() - 1;
                     }
                 }
                 SetFoodStorage();
@@ -511,8 +622,8 @@ public class Home extends Fragment {
         nextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!PetInfoModel.foodStuck.isEmpty()) {
-                    if (foodItemIndexSelected < PetInfoModel.foodStuck.size() - 1) {
+                if (!foodInStorageName.isEmpty()) {
+                    if (foodItemIndexSelected < foodInStorageName.size() - 1) {
                         foodItemIndexSelected += 1;
                     } else {
                         foodItemIndexSelected = 0;
@@ -536,8 +647,8 @@ public class Home extends Fragment {
         playBallArea.setVisibility(View.GONE);
 
     }
-    private void Setup()
-    {
+
+    private void Setup() {
         DocumentReference docPetRef = FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
         docPetRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -552,8 +663,6 @@ public class Home extends Fragment {
                         PetInfoModel.setPetType(petType);
                         String petName = doc.getString(getString(R.string.PET_NAME));
                         PetInfoModel.setPetName(petName);
-                        boolean status =  (doc.getBoolean(getString(R.string.IS_ALIVE)) !=null) ? doc.getBoolean(getString(R.string.IS_ALIVE)).booleanValue():false;
-                        PetInfoModel.setIsAlive(status);
                         int money  =  (doc.getLong(getString(R.string.MONEY)) !=null)? doc.getLong(getString(R.string.MONEY)).intValue():0;
                         PetInfoModel.setMoney(money);
                         int health = (doc.get(getString(R.string.HEALTH)) != null)? doc.getLong(getString(R.string.HEALTH)).intValue():0;
@@ -562,16 +671,16 @@ public class Home extends Fragment {
                         PetInfoModel.setHappy(happiness);
 
                         CheckCharacter();
-                        CheckHealth();
                         UpdateShitImages();
                         LoadItemsFromFirebase();
-                        healthProg.setProgress(PetInfoModel.getHealth());
-                        happinessProg.setProgress(PetInfoModel.getHealth());
-                        StartCleanDecay();
-                        StartHappyDecay();
-                        StartHealthDecay();
+                        healthProg.setProgress(health);
+                        happinessProg.setProgress(happiness);
+                        CheckHealth();
+                        HappinessLevelListener();
+                        HealthLevelListener();
                         UpdateMoney();
                         MoneyRealTimeListener();
+                        QuantityListener();
                     }
                 }
             }
@@ -579,8 +688,7 @@ public class Home extends Fragment {
 
     }
 
-    private void SetupPet()
-    {
+    private void SetupPet(){
         DocumentReference docUserRef = FirebaseFirestore.getInstance().collection(getString(R.string.USERS)).document(CredentialsModel.getCurrentUserUDI());
         docUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -658,28 +766,23 @@ public class Home extends Fragment {
         happyDecay = new Runnable() {
             @Override
             public void run() {
-                handler.postDelayed(this,9000);
-                if(PetInfoModel.getHappy()>0)
-                {
-                    random = new Random();
-                    int happyDecay = random.nextInt(5)+1;
-                    HappinessUpdate(-happyDecay);
-                }
+                random = new Random();
+                int happyDecay = random.nextInt(5)+1;
+                HappinessUpdate(-happyDecay);
+
             }
         };
-        handler.post(happyDecay);
+        handler.post(healthDecey);
+
     }
     private void StartHealthDecay() {
         healthDecey = new Runnable() {
             @Override
             public void run() {
                 handler.postDelayed(this,18000);
-                if(PetInfoModel.getHealth()>0)
-                {
-                    random = new Random();
-                    int healthDecay = random.nextInt(5)+1;
-                    HealthUpdate(-healthDecay);
-                }
+                random = new Random();
+                int healthDecay = random.nextInt(5)+1;
+                HealthUpdate(-healthDecay);
             }
         };
         handler.post(healthDecey);
@@ -748,8 +851,6 @@ public class Home extends Fragment {
     private void PlayIdle()
     {
         adjustShadow(30);
-        if(PetInfoModel.isIsAlive())
-        {
             petIdle = new Runnable() {
                 @Override
                 public void run() {
@@ -759,14 +860,11 @@ public class Home extends Fragment {
                 }
             };
             handler.post(petIdle);
-        }
     }
 
     private void DeadAnimation()
     {
         adjustShadow(40);
-        if(!PetInfoModel.isIsAlive())
-        {
             petDied = new Runnable() {
                 @Override
                 public void run() {
@@ -789,7 +887,6 @@ public class Home extends Fragment {
                 }
             };
             handler.post(petDied);
-        }
     }
 
     private void StopThreads()
