@@ -773,7 +773,6 @@ public class Home extends Fragment {
             }
         };
         handler.post(healthDecey);
-
     }
     private void StartHealthDecay() {
         healthDecey = new Runnable() {
