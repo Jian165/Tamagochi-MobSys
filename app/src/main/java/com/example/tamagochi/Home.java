@@ -23,19 +23,23 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Home extends Fragment {
 
@@ -97,58 +101,7 @@ public class Home extends Fragment {
 
     }
 
-    private void UpdateShitImages() {
-        if (PetInfoModel.shitCollection.isEmpty()) {
-            PetInfoModel.shitCollection.put(shit1Img.getId(), false);
-            PetInfoModel.shitCollection.put(shit2Img.getId(), false);
-            PetInfoModel.shitCollection.put(shit3Img.getId(), false);
-            PetInfoModel.shitCollection.put(shit4Img.getId(), false);
-            PetInfoModel.shitCollection.put(shit5Img.getId(), false);
-            UpdateShitImages();
-        } else {
-            Set<Integer> shitIDs = PetInfoModel.shitCollection.keySet();
-            for (Integer shitID : shitIDs) {
-                if (PetInfoModel.shitCollection.get(shitID)) {
-                    ShitVisibilty(shitArrayList, shitID, View.INVISIBLE);
-                } else {
-                    ShitVisibilty(shitArrayList, shitID, View.VISIBLE);
-                }
-            }
-        }
-    }
 
-    private void ShitVisibilty(ArrayList<ImageView> shitArray, int shitID, int visibility) {
-        for (ImageView shitImage : shitArray) {
-            if (shitImage.getId() == shitID) {
-                shitImage.setVisibility(visibility);
-            }
-        }
-
-    }
-
-
-    private View.OnDragListener shitDragListiner(ImageView shitImage) {
-        return new View.OnDragListener() {
-            @Override
-            public boolean onDrag(View v, DragEvent event) {
-                int dragEvent = event.getAction();
-                switch (dragEvent) {
-                    case DragEvent.ACTION_DRAG_ENTERED:
-                        break;
-                    case DragEvent.ACTION_DRAG_EXITED:
-                        break;
-                    case DragEvent.ACTION_DROP:
-                        final View view = (View) event.getLocalState();
-                        if (view.getId() == R.id.imgClean) {
-                            PetInfoModel.shitCollection.put(shitImage.getId(), true);
-                            UpdateShitImages();
-                        }
-                        break;
-                }
-                return true;
-            }
-        };
-    }
 
     private View.OnTouchListener BallAreaListener() {
         return new View.OnTouchListener() {
@@ -241,6 +194,7 @@ public class Home extends Fragment {
                             HappinessUpdate(happyStatcInc);
                             ReduceFoodStock();
                             SetFoodStorage();
+                            CheckHealth();
                         }
                         if (view.getId() == R.id.imgPlay) {
                             if (!isPlayBallIn) {
@@ -385,6 +339,89 @@ public class Home extends Fragment {
             }
         });
     }
+
+    private void UpdateShitImages() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+                Map<String,Object> poops = (Map<String, Object>) documentSnapshot.get(getString(R.string.POOP));
+                if(poops == null || poops.isEmpty())
+                {
+                    Map<String,Object> poopsToLoad = new HashMap<>();
+                    poopsToLoad.put(""+shit1Img.getId(), false);
+                    poopsToLoad.put(""+shit2Img.getId(), false);
+                    poopsToLoad.put(""+shit3Img.getId(), false);
+                    poopsToLoad.put(""+shit4Img.getId(), false);
+                    poopsToLoad.put(""+shit4Img.getId(), false);
+
+                    docRef.set(getString(R.string.POOP)+"."+poopsToLoad,SetOptions.merge());
+                    UpdateShitImages();
+                }
+                else
+                {
+                    Map<String,Object> poopsInStorage =  (Map<String, Object>) documentSnapshot.get(getString(R.string.POOP));
+                    if(poopsInStorage != null)
+                    {
+                        for (Map.Entry<String,Object> entry:poopsInStorage.entrySet())
+                        {
+                            String ImageID = entry.getKey();
+                            boolean imageVisibility = (boolean)entry.getValue();
+                            if(!imageVisibility)
+                            {
+                                ShitVisibilty(shitArrayList,Integer.parseInt(ImageID),View.VISIBLE);
+                            }
+                            else
+                            {
+                                ShitVisibilty(shitArrayList,Integer.parseInt(ImageID),View.INVISIBLE);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    private void ShitVisibilty(ArrayList<ImageView> shitArray, int shitID, int visibility) {
+        for (ImageView shitImage : shitArray) {
+            if (shitImage.getId() == shitID) {
+                shitImage.setVisibility(visibility);
+            }
+        }
+
+    }
+
+    private View.OnDragListener shitDragListiner(ImageView shitImage) {
+        return new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View v, DragEvent event) {
+                int dragEvent = event.getAction();
+                switch (dragEvent) {
+                    case DragEvent.ACTION_DRAG_ENTERED:
+                        break;
+                    case DragEvent.ACTION_DRAG_EXITED:
+                        break;
+                    case DragEvent.ACTION_DROP:
+                        final View view = (View) event.getLocalState();
+                        if (view.getId() == R.id.imgClean) {
+                            PetInfoModel.shitCollection.put(shitImage.getId(), true);
+                            Map<String,Object> updateMap=new HashMap<>();
+                            updateMap.put(getString(R.string.POOP)+"."+shitImage.getId(),true);
+                            FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI()).update(updateMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                }
+                            });
+                        }
+                        UpdateShitImages();
+                        break;
+                }
+                return true;
+            }
+        };
+    }
     private void CheckCharacter() {
         if (PetInfoModel.getPetType().equals("Cat")) {
             charachterIdleImages = catIdleImages;
@@ -442,10 +479,15 @@ public class Home extends Fragment {
                 new EventListener<DocumentSnapshot>() {
                     @Override
                     public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                        if(value.exists() && value != null)
+                        if(error != null)
+                        {
+                            return;
+                        }
+                        if( value != null && value.exists())
                         {
                             int happyLevel =((Long) value.getLong(getString(R.string.HAPPINESS))).intValue();
-                            happinessProg.setProgress(happyLevel);
+                            PetInfoModel.setHappy(happyLevel);
+                            happinessProg.setProgress(PetInfoModel.getHappy());
                         }
                     }
                 }
@@ -495,32 +537,50 @@ public class Home extends Fragment {
                         if(value.exists() && value != null)
                         {
                             int healthLevel =((Long) value.getLong(getString(R.string.HEALTH))).intValue();
-                            healthProg.setProgress(healthLevel);
-                            CheckHealth();
+                            PetInfoModel.setHealth(healthLevel);
+                            int lastProgress = healthProg.getProgress();
+                            healthProg.setProgress(PetInfoModel.getHealth());
+
+                            if(lastProgress != healthProg.getProgress())
+                            {
+                                CheckHealth();
+                            }
                         }
                     }
                 }
         );
     }
+
     private void CheckHealth() {
         StopDead();
         StopIdle();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
         if (PetInfoModel.getHealth() <= 0 ) {
+            docRef.update(getString(R.string.IS_ALIVE),false).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                }
+            });
             PetInfoModel.setIsAlive(false);
             DeadAnimation();
+
         } else {
             if(!PetInfoModel.isIsAlive())
             {
-                Toast.makeText(getContext(), PetInfoModel.getPetName()+" Is Alive", Toast.LENGTH_SHORT).show();
                 StartCleanDecay();
                 StartHappyDecay();
                 StartHealthDecay();
             }
+            docRef.update(getString(R.string.IS_ALIVE),true).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                }
+            });
             PetInfoModel.setIsAlive(true);
             PlayIdle();
         }
     }
-
 
     private void LoadComponents() {
 
@@ -667,6 +727,7 @@ public class Home extends Fragment {
                         PetInfoModel.setMoney(money);
                         int health = (doc.get(getString(R.string.HEALTH)) != null)? doc.getLong(getString(R.string.HEALTH)).intValue():0;
                         PetInfoModel.setHealth(health);
+                        boolean isAlive = (doc.get(getString(R.string.IS_ALIVE)) != null)? doc.getBoolean(getString(R.string.IS_ALIVE)).booleanValue():false;
                         int happiness = (doc.get(getString(R.string.HAPPINESS)) != null)? doc.getLong(getString(R.string.HAPPINESS)).intValue():0;
                         PetInfoModel.setHappy(happiness);
 
@@ -688,6 +749,41 @@ public class Home extends Fragment {
 
     }
 
+    private void DecayFormTheLastTimestamp()
+    {
+        DocumentReference  docRef = FirebaseFirestore.getInstance().collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task != null && task.isSuccessful())
+                {
+                    DocumentSnapshot doc = task.getResult();
+
+                    Timestamp healthTimeStamp = doc.getTimestamp(getString(R.string.HEALTH_DECAY_TIMESTAMP));
+                    int countHealthPenalty = GetTimePenalty(healthTimeStamp,3);
+                    HealthUpdate(-(5*countHealthPenalty));
+
+                    Timestamp happinessTimeStamp = doc.getTimestamp(getString(R.string.HAPPINESS_DECAY_TIMESTAMP));
+                    int countHappyPenalty = GetTimePenalty(happinessTimeStamp,2);
+                    HealthUpdate(-(5*countHappyPenalty));
+
+                }
+
+            }
+        });
+    }
+
+    private int GetTimePenalty(Timestamp pastTimeStamp,int minutes)
+    {
+        Date now = new Date();
+        Date past = pastTimeStamp.toDate();
+
+        long  diffInMillis = now.getTime() - past.getTime();
+        long minutesPassed = TimeUnit.MICROSECONDS.toMinutes(diffInMillis);
+        return  (int) (minutesPassed/3);
+
+    }
+
     private void SetupPet(){
         DocumentReference docUserRef = FirebaseFirestore.getInstance().collection(getString(R.string.USERS)).document(CredentialsModel.getCurrentUserUDI());
         docUserRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -700,6 +796,7 @@ public class Home extends Fragment {
                     {
                         CredentialsModel.setPetDI(doc.getString(getString(R.string.PET_OWNED)));
                         PetInfoModel.setParentName(doc.getString(getString(R.string.NAME_AS_PARENT)));
+                        DecayFormTheLastTimestamp();
                         Setup();
                     }
                 }
@@ -708,80 +805,54 @@ public class Home extends Fragment {
     }
 
 
-    private boolean IsAllShitSpawed(Set<Integer> shitkeys)
-    {
-        for(Integer key: shitkeys)
-        {
-           if(PetInfoModel.shitCollection.get(key))
-           {
-               return false;
-           }
-        }
-        return true;
-    }
-    private void ShitSpawner()
-    {
-        Set<Integer> shitkeys= PetInfoModel.shitCollection.keySet();
-        if(!IsAllShitSpawed(shitkeys))
-        {
-            random = new Random();
-            ArrayList<Integer> shitsNotSpawned = FilterAvailableShitToSpaw();
-            int shitSelectedIndex = random.nextInt(shitsNotSpawned.size());
-            int shitSelected = shitsNotSpawned.get(shitSelectedIndex);
-            for(Integer keys: shitkeys)
-            {
-               if(keys == shitSelected)
-               {
-                   PetInfoModel.shitCollection.put(keys,false);
-                   UpdateShitImages();
-               }
-            }
-        }
-    }
-    private ArrayList<Integer> FilterAvailableShitToSpaw()
-    {
-        Set<Integer> shitkeys= PetInfoModel.shitCollection.keySet();
-        ArrayList<Integer> filteredShits = new ArrayList<>();
-        for(int key:shitkeys)
-        {
-            if(PetInfoModel.shitCollection.get(key))
-            {
-                filteredShits.add(key);
-            }
-        }
-        return filteredShits;
-    }
 
     private void StartCleanDecay() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+
         cleanlinessDecay = new Runnable() {
             @Override
             public void run() {
-                handler.postDelayed(this,17000);
-                ShitSpawner();
+                handler.postDelayed(this,24000);
+                docRef.update(getString(R.string.POOP_TIMESTAMP), Timestamp.now());
             }
         };
         handler.post(cleanlinessDecay);
     }
+
     private void StartHappyDecay () {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+
         happyDecay = new Runnable() {
             @Override
             public void run() {
-                random = new Random();
-                int happyDecay = random.nextInt(5)+1;
-                HappinessUpdate(-happyDecay);
-
+                handler.postDelayed(this, 12000);
+                if (PetInfoModel.getHappy() > 0) {
+                    random = new Random();
+                    int happyDecay = random.nextInt(5) + 1;
+                    HappinessUpdate(-happyDecay);
+                    docRef.update(getString(R.string.HAPPINESS_DECAY_TIMESTAMP), Timestamp.now());
+                }
             }
         };
-        handler.post(healthDecey);
+        handler.post(happyDecay);
     }
     private void StartHealthDecay() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection(getString(R.string.PETS)).document(CredentialsModel.getPetDI());
+
         healthDecey = new Runnable() {
             @Override
             public void run() {
                 handler.postDelayed(this,18000);
-                random = new Random();
-                int healthDecay = random.nextInt(5)+1;
-                HealthUpdate(-healthDecay);
+                if(PetInfoModel.getHealth()>0)
+                {
+                    random = new Random();
+                    int healthDecay = random.nextInt(5)+1;
+                    HealthUpdate(-healthDecay);
+                    docRef.update(getString(R.string.HEALTH_DECAY_TIMESTAMP), Timestamp.now());
+                }
             }
         };
         handler.post(healthDecey);
@@ -850,6 +921,8 @@ public class Home extends Fragment {
     private void PlayIdle()
     {
         adjustShadow(30);
+        if(PetInfoModel.isIsAlive())
+        {
             petIdle = new Runnable() {
                 @Override
                 public void run() {
@@ -859,11 +932,14 @@ public class Home extends Fragment {
                 }
             };
             handler.post(petIdle);
+        }
     }
 
     private void DeadAnimation()
     {
         adjustShadow(40);
+        if(!PetInfoModel.isIsAlive())
+        {
             petDied = new Runnable() {
                 @Override
                 public void run() {
@@ -886,6 +962,7 @@ public class Home extends Fragment {
                 }
             };
             handler.post(petDied);
+        }
     }
 
     private void StopThreads()

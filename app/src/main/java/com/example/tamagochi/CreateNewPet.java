@@ -100,11 +100,13 @@ public class CreateNewPet extends AppCompatActivity {
         PetInfo.put(getString(R.string.PET_NAME),petName);
         PetInfo.put(getString(R.string.PET_GENDER),petType);
         PetInfo.put(getString(R.string.IS_ALIVE),true);
-        PetInfo.put(getString(R.string.LAST_FED), Timestamp.now());
         PetInfo.put(getString(R.string.HEALTH),80);
+        PetInfo.put(getString(R.string.HEALTH_DECAY_TIMESTAMP), Timestamp.now());
         PetInfo.put(getString(R.string.HAPPINESS),80);
+        PetInfo.put(getString(R.string.HAPPINESS_DECAY_TIMESTAMP), Timestamp.now());
         PetInfo.put(getString(R.string.MONEY),2);
         PetInfo.put(getString(R.string.POOP),PoopStorage);
+        PetInfo.put(getString(R.string.POOP_TIMESTAMP), Timestamp.now());
         PetInfo.put(getString(R.string.FOOD_STORAGE),FoodStorage);
 
         db.collection(getString(R.string.PETS)).document(PetID).set(PetInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
